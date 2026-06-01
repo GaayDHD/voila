@@ -655,29 +655,11 @@
     outline: 3px solid rgba(0,113,227,.22);
     outline-offset: 2px;
   }
-
-  body.embed-mode {
-    background: transparent;
-    min-height: auto;
-  }
-
-  body.embed-mode .nav,
-  body.embed-mode .footer {
-    display: none;
-  }
-
-  body.embed-mode .hero {
-    padding-top: 32px;
-  }
-
-  body.embed-mode .wrap {
-    padding-bottom: 40px;
-  }
-
 </style>
 
 
-  <script type="module" src="/src/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/opentype.js@latest/dist/opentype.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -827,10 +809,6 @@
 <div id="toast-container"></div>
 
 <script>
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const isEmbedMode = urlParams.get('embed') === 'true';
-  if (isEmbedMode) document.body.classList.add('embed-mode');
   /* ── ELEMENTS ── */
   const dropzone    = document.getElementById('dropzone');
   const fileInput   = document.getElementById('fileInput');

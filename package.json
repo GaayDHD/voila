@@ -1,0 +1,31 @@
+{
+  "name": "office-font-prioritiser",
+  "version": "1.0.0",
+  "description": "**Office Font Prioritiser** is a web‑based utility designed to help macOS users take control of how Microsoft Office (Word and PowerPoint) choose fonts. The app extracts the exact PostScript names from your font files, deduplicates them and builds a ready‑to‑run Terminal command that instructs Office to favour your chosen fonts over its defaults. Everything runs client‑side, so none of your font data ever leaves your browser.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GaayDHD/office-font-prioritiser.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/GaayDHD/office-font-prioritiser/issues"
+  },
+  "homepage": "https://github.com/GaayDHD/office-font-prioritiser#readme",
+  "devDependencies": {
+    "vite": "^8.0.16"
+  },
+  "dependencies": {
+    "opentype.js": "^2.0.0",
+    "sortablejs": "^1.15.7"
+  }
+}
