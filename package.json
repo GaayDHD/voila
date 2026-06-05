@@ -1,7 +1,7 @@
 {
-  "name": "office-font-prioritiser",
+  "name": "voila",
   "version": "1.0.0",
-  "description": "**Office Font Prioritiser** is a web‑based utility designed to help macOS users take control of how Microsoft Office (Word and PowerPoint) choose fonts. The app extracts the exact PostScript names from your font files, deduplicates them and builds a ready‑to‑run Terminal command that instructs Office to favour your chosen fonts over its defaults. Everything runs client‑side, so none of your font data ever leaves your browser.",
+  "description": "**Office Font\u00a0Prioritiser** is a web\u2011based utility designed to help macOS users take control of how Microsoft Office (Word and PowerPoint) choose fonts. The app extracts the exact PostScript names from your font files, deduplicates them and builds a ready\u2011to\u2011run Terminal command that instructs Office to favour your chosen fonts over its defaults. Everything runs client\u2011side, so none of your font data ever leaves your browser.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
