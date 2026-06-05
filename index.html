@@ -756,6 +756,144 @@
     }
   }
 
+
+  /* Strong dark-mode polish for embedded app */
+  @media (prefers-color-scheme: dark) {
+    html,
+    body {
+      background: #000000;
+      color: var(--text);
+    }
+
+    .hero {
+      background: #000000;
+    }
+
+    .divider {
+      background: rgba(255,255,255,.12);
+    }
+
+    .wrap {
+      background: #000000;
+    }
+
+    .card,
+    .panel,
+    .font-card,
+    .command-card,
+    .results-card {
+      background: rgba(28,28,30,.78);
+      border-color: rgba(255,255,255,.12);
+      box-shadow: 0 2px 24px rgba(0,0,0,.35), 0 24px 80px rgba(0,0,0,.55);
+    }
+
+    .card .bar,
+    .bar,
+    .panel-header,
+    .card-header {
+      background: rgba(44,44,46,.72);
+      border-color: rgba(255,255,255,.10);
+      color: var(--text);
+    }
+
+    .title,
+    .section-title,
+    .label,
+    .muted,
+    .hint {
+      color: rgba(255,255,255,.54);
+    }
+
+    .dropzone {
+      background: rgba(44,44,46,.68);
+      border-color: rgba(255,255,255,.18);
+      color: var(--text);
+    }
+
+    .dropzone:hover {
+      background: rgba(58,58,60,.76);
+      border-color: color-mix(in oklab, var(--blue) 45%, rgba(255,255,255,.18));
+    }
+
+    .dropzone .small,
+    .small {
+      color: rgba(255,255,255,.48);
+    }
+
+    .drop-icon {
+      background: color-mix(in oklab, var(--blue) 18%, rgba(28,28,30,.9));
+      border-color: color-mix(in oklab, var(--blue) 28%, rgba(255,255,255,.14));
+      color: var(--blue);
+    }
+
+    input,
+    select,
+    textarea,
+    .command-box,
+    .generated-command,
+    .code-box,
+    pre,
+    code {
+      background: rgba(28,28,30,.88) !important;
+      color: rgba(255,255,255,.88) !important;
+      border-color: rgba(255,255,255,.16) !important;
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: rgba(255,255,255,.34);
+    }
+
+    button {
+      background: rgba(44,44,46,.82);
+      color: rgba(255,255,255,.88);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    button:hover {
+      background: rgba(58,58,60,.92);
+    }
+
+    button.primary,
+    .primary {
+      background: var(--blue);
+      color: #ffffff;
+      border-color: transparent;
+    }
+
+    button.secondary,
+    .secondary {
+      background: rgba(58,58,60,.74);
+      color: rgba(255,255,255,.82);
+      border-color: rgba(255,255,255,.16);
+    }
+
+    button.destructive,
+    .destructive {
+      background: color-mix(in oklab, var(--red) 14%, rgba(28,28,30,.9));
+      color: var(--red);
+      border-color: color-mix(in oklab, var(--red) 34%, rgba(255,255,255,.12));
+    }
+
+    .pill,
+    .chip,
+    .toggle,
+    .badge,
+    .nav-pill,
+    .bar-count,
+    .font-count {
+      background: rgba(44,44,46,.74);
+      color: rgba(255,255,255,.72);
+      border-color: rgba(255,255,255,.14);
+    }
+
+    .footer {
+      background: #000000;
+      border-color: rgba(255,255,255,.10);
+      color: rgba(255,255,255,.42);
+    }
+  }
+
 </style>
 
 
