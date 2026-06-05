@@ -7,6 +7,15 @@
 
   
 <style>
+  @font-face {
+    font-family: "Robinco";
+    src: url("https://res.cloudinary.com/dcd54tom6/raw/upload/v1780633617/Robinco-Regular_pywoco.woff2") format("woff2"),
+         url("https://res.cloudinary.com/dcd54tom6/raw/upload/v1780633616/Robinco-Regular_bb7dcw.woff") format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
   :root {
     color-scheme: light dark;
     --bg: #f5f5f7;
@@ -146,6 +155,7 @@
     margin-bottom: 20px;
   }
   .hero h1 {
+    font-family: "Robinco", var(--sans);
     font-size: clamp(42px, 7vw, 78px);
     font-weight: 700;
     letter-spacing: -.03em;
@@ -157,6 +167,7 @@
     z-index: 1;
   }
   .hero h1 em {
+    font-family: "Robinco", var(--sans);
     font-style: normal;
     background: linear-gradient(135deg, var(--blue) 0%, color-mix(in oklab, var(--blue) 50%, var(--purple)) 100%);
     -webkit-background-clip: text;
