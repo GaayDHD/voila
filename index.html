@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Voila</title>
+  <title>Voilà</title>
 
   
 <style>
@@ -21,6 +21,8 @@
     --blue-hover: #0077ed;
     --red: #d70015;
     --green: #1d9b4d;
+    --purple: #BF5AF2;
+    --card: rgba(255,255,255,.82);
     --yellow: #b28704;
     --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.05);
     --shadow-soft: 0 1px 2px rgba(0,0,0,.03), 0 4px 14px rgba(0,0,0,.04);
@@ -46,50 +48,31 @@
   }
 
   .nav {
-    position: absolute;
+    position: sticky;
     top: 0;
-    left: 0;
-    right: 0;
     z-index: 200;
     height: var(--nav-h);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: transparent;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-bottom: 0;
+    background: color-mix(in oklab, var(--bg) 78%, transparent);
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    border-bottom: 1px solid var(--stroke-2);
   }
   .nav-inner {
     width: 100%;
-    max-width: 1040px;
+    max-width: 1080px;
     padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
   }
   .nav-brand {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -.01em;
-    color: var(--text);
-    text-decoration: none;
+    display: none;
   }
-  .nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
-  .nav-pill,
-  .nav-font-count {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    min-height: 30px;
-    padding: 0 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 500;
-    background: rgba(255,255,255,.92);
-    border: 1px solid var(--stroke-2);
-    color: var(--muted);
+  .nav-right {
+    display: none;
   }
   .nav-font-count {
     color: var(--blue);
@@ -105,11 +88,48 @@
 
   .hero {
     text-align: center;
-    padding: 64px 24px 32px;
+    padding: 96px 24px 80px;
     position: relative;
+    overflow: hidden;
   }
-  .hero-blobs,
-  .blob { display: none; }
+  .hero-blobs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(72px);
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+  .blob-1 {
+    width: 700px;
+    height: 440px;
+    top: -120px;
+    left: -80px;
+    background: color-mix(in oklab, var(--blue) 14%, transparent);
+    animation-duration: 16s;
+  }
+  .blob-2 {
+    width: 600px;
+    height: 380px;
+    top: -60px;
+    right: -100px;
+    background: color-mix(in oklab, var(--purple) 9%, transparent);
+    animation-duration: 12s;
+    animation-delay: -4s;
+  }
+  .blob-3 {
+    width: 500px;
+    height: 300px;
+    bottom: -80px;
+    left: 30%;
+    background: color-mix(in oklab, var(--green) 9%, transparent);
+    animation-duration: 18s;
+    animation-delay: -8s;
+  }
   .hero-eyebrow {
     display: inline-flex;
     align-items: center;
@@ -126,26 +146,33 @@
     margin-bottom: 20px;
   }
   .hero h1 {
-    max-width: 14ch;
-    margin: 0 auto 14px;
-    font-size: clamp(36px, 6vw, 62px);
-    line-height: 1.04;
-    letter-spacing: -.04em;
+    font-size: clamp(42px, 7vw, 78px);
     font-weight: 700;
+    letter-spacing: -.03em;
+    line-height: 1.04;
+    max-width: 18ch;
+    margin: 0 auto 24px;
+    animation: fadeUp .65s .08s ease both;
+    position: relative;
+    z-index: 1;
   }
   .hero h1 em {
     font-style: normal;
-    color: var(--text);
-    background: none;
-    -webkit-text-fill-color: initial;
+    background: linear-gradient(135deg, var(--blue) 0%, color-mix(in oklab, var(--blue) 50%, var(--purple)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   .hero-sub {
-    max-width: 43ch;
-    margin: 0 auto 24px;
-    color: var(--muted);
     font-size: 19px;
-    line-height: 1.45;
-    letter-spacing: -.01em;
+    line-height: 1.52;
+    color: var(--muted);
+    max-width: 48ch;
+    margin: 0 auto 40px;
+    font-weight: 400;
+    animation: fadeUp .65s .14s ease both;
+    position: relative;
+    z-index: 1;
   }
   .hero-badges {
     display: flex;
@@ -178,7 +205,7 @@
   }
   @media (max-width: 920px) {
     .grid { grid-template-columns: 1fr; }
-    .hero { padding: calc(var(--nav-h) + 28px) 24px 56px; }
+    .hero { padding: 96px 24px 80px; }
   }
 
   .card {
@@ -631,6 +658,9 @@
     font-size: 12px;
   }
 
+  @keyframes fadeUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes drift   { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,30px) scale(1.08); } }
+
   @keyframes toastIn {
     from { opacity: 0; transform: translateY(10px) scale(.96); }
     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -675,10 +705,7 @@
 <nav class="nav">
   <div class="nav-inner">
     <span class="nav-brand"></span>
-    <div class="nav-right">
-      <div id="navFontCount" class="nav-font-count" data-empty="true">0 fonts</div>
-      <div class="nav-pill"><span class="nav-dot"></span>macOS · Office 365</div>
-    </div>
+    <div class="nav-right"></div>
   </div>
 </nav>
 
@@ -688,7 +715,7 @@
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
   </div>
-  <h1>Voilà!</h1>
+  <h1><em>Voilà!</em></h1>
   <p class="hero-sub">Font Prioritiser for Microsoft Office</p>
 </section>
 
@@ -806,7 +833,7 @@
 </div>
 
 <footer class="footer">
-  Office Font Prioritiser for macOS
+  Voilà
 </footer>
 
 <div id="toast-container"></div>
@@ -852,7 +879,7 @@
   const importFile         = document.getElementById('importFile');
   const presetName         = document.getElementById('presetName');
 
-  const STORAGE_KEY = 'office-font-prioritiser-presets-v1';
+  const STORAGE_KEY = 'voila-presets-v1';
   let psNames   = [];
   let multiline = false;
   let undoStack = [];
@@ -1057,9 +1084,9 @@
   });
   downloadBtn.addEventListener('click', () => {
     const cmd = buildCommand({multiline}); if(!cmd) return;
-    const blob = new Blob([`#!/bin/zsh\n# Generated by Office Font Prioritiser\n# Steps: run this → Word and PowerPoint will be asked to quit → open → quit → reopen Office once\n\n${cmd}\n`], {type:'text/plain'});
+    const blob = new Blob([`#!/bin/zsh\n# Generated by Voilà\n# Steps: run this → Word and PowerPoint will be asked to quit → open → quit → reopen Office once\n\n${cmd}\n`], {type:'text/plain'});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download='prioritise-fonts.sh'; document.body.appendChild(a); a.click(); a.remove();
+    const a = document.createElement('a'); a.href=url; a.download='voila-prioritise-fonts.sh'; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
     showToast('Script downloaded', 'success');
   });
@@ -1101,7 +1128,7 @@
   function exportPresets() {
     const p=readPresets();
     const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='office-font-prioritiser-presets.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+    const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='voila-presets.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
     showToast(`${p.length} preset${p.length!==1?'s':''} exported`, 'success');
   }
   async function importPresetsFromFile(file) {
