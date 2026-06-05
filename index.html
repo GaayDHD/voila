@@ -42,23 +42,23 @@
     min-height: 100vh;
     font-family: var(--sans);
     color: var(--text);
-    background:
-      radial-gradient(circle at top, rgba(0,113,227,.06), transparent 32%),
-      linear-gradient(180deg, #fbfbfd 0%, var(--bg) 22%, var(--bg) 100%);
+    background: var(--bg);
   }
 
   .nav {
-    position: sticky;
+    position: absolute;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 200;
     height: var(--nav-h);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255,255,255,.78);
-    backdrop-filter: saturate(180%) blur(18px);
-    -webkit-backdrop-filter: saturate(180%) blur(18px);
-    border-bottom: 1px solid rgba(210,210,215,.72);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-bottom: 0;
   }
   .nav-inner {
     width: 100%;
@@ -168,18 +168,9 @@
   }
   .badge strong { color: var(--text); font-weight: 600; }
 
-  .divider {
-    max-width: 1040px;
-    height: 1px;
-    margin: 0 auto;
-    background: linear-gradient(90deg, transparent 0%, var(--stroke) 12%, var(--stroke) 88%, transparent 100%);
-  }
+  .divider { height: 1px; background: var(--stroke); }
 
-  .wrap {
-    max-width: 1040px;
-    margin: 0 auto;
-    padding: 28px 24px 88px;
-  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 24px 96px; }
   .grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -187,7 +178,7 @@
   }
   @media (max-width: 920px) {
     .grid { grid-template-columns: 1fr; }
-    .hero { padding-top: 48px; }
+    .hero { padding: calc(var(--nav-h) + 28px) 24px 56px; }
   }
 
   .card {
@@ -683,7 +674,7 @@
 
 <nav class="nav">
   <div class="nav-inner">
-    <span class="nav-brand">Font Prioritiser by Lorem Ipsum Creative</span>
+    <span class="nav-brand"></span>
     <div class="nav-right">
       <div id="navFontCount" class="nav-font-count" data-empty="true">0 fonts</div>
       <div class="nav-pill"><span class="nav-dot"></span>macOS · Office 365</div>
@@ -697,14 +688,8 @@
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
   </div>
-  <div class="hero-eyebrow">macOS utility</div>
-  <h1>Prioritise fonts in Office. <em>Cleanly.</em></h1>
-  <p class="hero-sub">Drop in your fonts, capture the exact PostScript names, and generate the macOS command that keeps Word and PowerPoint in line.</p>
-  <div class="hero-badges">
-    <div id="countBadge" class="badge"><strong>0</strong>&nbsp;/ 50 fonts</div>
-    <div class="badge">Designed for <strong>macOS</strong></div>
-    <div id="warnBadge" class="badge" style="display:none; color:var(--red);">⚠ Over limit</div>
-  </div>
+  <h1>Voilà!</h1>
+  <p class="hero-sub">Font Prioritiser for Microsoft Office</p>
 </section>
 
 <div class="divider"></div>
