@@ -688,6 +688,89 @@
     outline-offset: 2px;
   }
 
+
+  /* Pre-upload layout */
+  .grid.pre-upload {
+    grid-template-columns: 1fr;
+  }
+
+  .grid.pre-upload .command-card {
+    display: none;
+  }
+
+  .grid.pre-upload .font-card {
+    width: 100%;
+  }
+
+  .grid.pre-upload .font-card .bar {
+    display: none;
+  }
+
+  .grid.pre-upload .font-card .body {
+    min-height: 52vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+  }
+
+  .grid.pre-upload #dropzone {
+    width: min(920px, 100%);
+    min-height: 42vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    border-radius: 40px;
+    border-width: 2px;
+  }
+
+  .grid.pre-upload .drop-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    margin-bottom: 18px;
+  }
+
+  .grid.pre-upload .drop-icon svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .grid.pre-upload .dropzone .big {
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .grid.pre-upload .dropzone .small {
+    font-size: 16px;
+    line-height: 1.65;
+    max-width: 34ch;
+  }
+
+  .grid.pre-upload .row {
+    margin-top: 26px;
+  }
+
+  .grid.pre-upload #chooseBtn,
+  .grid.pre-upload #mergeManualBtn {
+    padding: 0 22px;
+    min-height: 42px;
+    font-size: 15px;
+  }
+
+  .grid.pre-upload .controls,
+  .grid.pre-upload .section-title,
+  .grid.pre-upload #psList,
+  .grid.pre-upload #emptyState,
+  .grid.pre-upload #listHint,
+  .grid.pre-upload #manualBox,
+  .grid.pre-upload #errors {
+    display: none !important;
+  }
+
+
   body.embed-mode {
     background: transparent;
     min-height: auto;
@@ -701,6 +784,16 @@
   body.embed-mode .hero {
     padding: 96px 24px 80px;
   }
+
+
+  body.embed-mode .grid.pre-upload .font-card .body {
+    min-height: 52vh;
+  }
+
+  body.embed-mode .grid.pre-upload #dropzone {
+    min-height: 42vh;
+  }
+
 
   body.embed-mode .wrap {
     padding: 48px 24px 40px;
@@ -932,9 +1025,9 @@
 <div class="divider"></div>
 
 <div class="wrap">
-  <div class="grid">
+  <div class="grid pre-upload" id="mainGrid">
 
-    <div class="card">
+    <div class="card font-card">
       <div class="bar">
         <div class="bar-left">
           <div class="title">Fonts</div>
@@ -998,7 +1091,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card command-card">
       <div class="bar">
         <div class="bar-left"><div class="title">Command &amp; Presets</div></div>
         <div class="preset-actions">
@@ -1054,6 +1147,7 @@
   const isEmbedMode = urlParams.get('embed') === 'true';
   if (isEmbedMode) document.body.classList.add('embed-mode');
   /* ── ELEMENTS ── */
+  const mainGrid    = document.getElementById('mainGrid');
   const dropzone    = document.getElementById('dropzone');
   const fileInput   = document.getElementById('fileInput');
   const chooseBtn   = document.getElementById('chooseBtn');
@@ -1243,9 +1337,18 @@
     }).join('');
   }
 
+
+  function updateLayoutState() {
+    const hasFonts = psNames.length > 0;
+    if (mainGrid) {
+      mainGrid.classList.toggle('pre-upload', !hasFonts);
+    }
+  }
+
   /* ── UPDATE ALL ── */
   function updateAll() {
     psNames = dedupePreserveOrder(psNames);
+    updateLayoutState();
     if (toggleSort.checked) psNames = autoSortByWeight(psNames);
     renderList();
     const cmd = buildCommand({ multiline });
