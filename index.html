@@ -1056,16 +1056,6 @@
           </div>
         </div>
 
-        <div class="controls">
-          <label class="toggle"><input id="toggleClearFirst" type="checkbox" /> Clear existing first</label>
-          <label class="toggle"><input id="toggleSafe" type="checkbox" checked /> Safe chaining (&&)</label>
-          <label class="toggle"><input id="toggleKill" type="checkbox" checked /> Quit Word + PowerPoint</label>
-          <label class="toggle"><input id="toggleSort" type="checkbox" /> Auto-sort by weight</label>
-          <div class="seg" aria-label="Output mode">
-            <button id="outOne" class="active" type="button">One-line</button>
-            <button id="outMulti" type="button">Multi-line</button>
-          </div>
-        </div>
 
         <div class="section-title">PostScript names <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted-2)">— drag to reorder</span></div>
         <ul id="psList" class="list"></ul>
@@ -1083,11 +1073,6 @@
         </div>
         <div class="hint" id="listHint" style="display:none">Priority flows top to bottom. Duplicates removed automatically.</div>
 
-        <div class="section-title">Manual mode</div>
-        <textarea id="manualBox" rows="5" placeholder="Paste PostScript names here, one per line."></textarea>
-
-        <div class="section-title">Errors &amp; warnings</div>
-        <div id="errors" class="errors muted">None.</div>
       </div>
     </div>
 
@@ -1256,8 +1241,16 @@
   function dedupePreserveOrder(arr) { const s = new Set(); return arr.filter(x => { if(s.has(x)) return false; s.add(x); return true; }); }
 
   function setErrors(errs) {
-    if (!errs || !errs.length) { errorsBox.className='errors muted'; errorsBox.textContent='None.'; }
-    else { errorsBox.className='errors'; errorsBox.textContent=errs.join('\n'); }
+    if (!errorsBox) return;
+
+    if (!errs || !errs.length) {
+      errorsBox.className = 'errors muted';
+      errorsBox.textContent = 'None.';
+    } else {
+      errorsBox.className = 'errors';
+      errorsBox.textContent = errs.join('
+');
+    }
   }
 
   /* ── SYNTAX HIGHLIGHT ── */
@@ -1324,10 +1317,14 @@
   /* ── BUILD COMMAND ── */
   function buildCommand({ multiline=false }={}) {
     if (!psNames.length) return '';
-    const joiner = toggleSafe.checked ? ' && ' : '; ';
+
+    const safeChaining = toggleSafe ? toggleSafe.checked : true;
+    const clearFirst = toggleClearFirst ? toggleClearFirst.checked : false;
+    const killOffice = toggleKill ? toggleKill.checked : true;
+    const joiner = safeChaining ? ' && ' : '; ';
     const q = s => `"${s.replaceAll('"','\\"')}"`;
     const parts = [];
-    if (toggleClearFirst.checked) parts.push(`defaults delete com.microsoft.office PrioritizedFonts 2>/dev/null`);
+    if (clearFirst) parts.push(`defaults delete com.microsoft.office PrioritizedFonts 2>/dev/null`);
     if (!multiline) {
       parts.push(`defaults write com.microsoft.office PrioritizedFonts -array ${psNames.map(q).join(' ')}`);
     } else {
@@ -1335,12 +1332,12 @@
       psNames.forEach((n,i) => lines.push(`${q(n)}${i<psNames.length-1?' \\':''}`));
       parts.push(lines.join('\n'));
     }
-    if (toggleKill.checked) {
+    if (killOffice) {
       parts.push(`osascript -e 'tell application "Microsoft Word" to quit'`);
       parts.push(`osascript -e 'tell application "Microsoft PowerPoint" to quit'`);
     }
     if (!multiline) return parts.join(joiner);
-    const chain = toggleSafe.checked ? '&&' : ';';
+    const chain = safeChaining ? '&&' : ';';
     return parts.map((p,i) => {
       if (i===parts.length-1) return p;
       if (p.includes('\n')) { const arr=p.split('\n'); arr[arr.length-1]+=` \\\n${chain} `; return arr.join('\n'); }
@@ -1361,7 +1358,7 @@
     psNames = dedupePreserveOrder(psNames);
     updateLayoutState();
     updateLayoutState();
-    if (toggleSort.checked) psNames = autoSortByWeight(psNames);
+    if (toggleSort && toggleSort.checked) psNames = autoSortByWeight(psNames);
     renderList();
     const cmd = buildCommand({ multiline });
     if (cmd) { cmdOut.innerHTML = highlight(cmd); }
@@ -1370,9 +1367,17 @@
   }
 
   /* ── OUTPUT MODE ── */
-  function setOutputMode(isMulti) { multiline=isMulti; outOne.classList.toggle('active',!multiline); outMulti.classList.toggle('active',multiline); updateAll(); }
-  outOne.addEventListener('click', () => setOutputMode(false));
-  outMulti.addEventListener('click', () => setOutputMode(true));
+  function setOutputMode(isMulti) {
+    multiline = isMulti;
+
+    if (outOne) outOne.classList.toggle('active', !multiline);
+    if (outMulti) outMulti.classList.toggle('active', multiline);
+
+    updateAll();
+  }
+
+  if (outOne) outOne.addEventListener('click', () => setOutputMode(false));
+  if (outMulti) outMulti.addEventListener('click', () => setOutputMode(true));
 
   /* ── DROP ── */
   dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
@@ -1382,23 +1387,33 @@
   fileInput.addEventListener('change', async () => { const f=[...(fileInput.files||[])]; fileInput.value=''; if(f.length) await addFiles(f); });
 
   /* ── MANUAL ── */
-  mergeManualBtn.addEventListener('click', () => {
-    const lines = normaliseLines(manualBox.value);
-    if (!lines.length) return;
-    pushUndo('Merge manual'); psNames=dedupePreserveOrder([...psNames,...lines]); updateAll();
-    showToast(`Added ${lines.length} name${lines.length!==1?'s':''}`, 'success');
-  });
+  if (mergeManualBtn && manualBox) {
+    mergeManualBtn.addEventListener('click', () => {
+      const lines = normaliseLines(manualBox.value);
+      if (!lines.length) return;
+
+      pushUndo('Merge manual');
+      psNames = dedupePreserveOrder([...psNames, ...lines]);
+      updateAll();
+
+      showToast(`Added ${lines.length} name${lines.length!==1?'s':''}`, 'success');
+    });
+  }
 
   /* ── CLEAR ── */
   clearBtn.addEventListener('click', () => {
-    if (!psNames.length && !manualBox.value) return;
+    if (!psNames.length && !(manualBox && manualBox.value)) return;
     const n = psNames.length;
-    pushUndo('Clear all'); psNames=[]; manualBox.value=''; setErrors([]); updateAll();
+    pushUndo('Clear all');
+    psNames = [];
+    if (manualBox) manualBox.value = '';
+    setErrors([]);
+    updateAll();
     showToast(`Cleared ${n} font${n!==1?'s':''}`, 'info');
   });
 
   /* ── TOGGLES ── */
-  [toggleClearFirst,toggleSafe,toggleKill,toggleSort].forEach(el => el.addEventListener('change', updateAll));
+  [toggleClearFirst, toggleSafe, toggleKill, toggleSort].filter(Boolean).forEach(el => el.addEventListener('change', updateAll));
 
   /* ── COPY / DOWNLOAD ── */
   copyBtn.addEventListener('click', async () => {
@@ -1419,8 +1434,25 @@
   /* ── PRESETS ── */
   function readPresets() { try { const r=localStorage.getItem(STORAGE_KEY); if(!r) return []; const p=JSON.parse(r); return Array.isArray(p)?p:[]; } catch { return []; } }
   function writePresets(p) { localStorage.setItem(STORAGE_KEY,JSON.stringify(p)); }
-  function currentOptionsSnapshot() { return {clearFirst:toggleClearFirst.checked,safe:toggleSafe.checked,kill:toggleKill.checked,sort:toggleSort.checked,multiline}; }
-  function applyOptionsSnapshot(opts) { if(!opts) return; toggleClearFirst.checked=!!opts.clearFirst; toggleSafe.checked=!!opts.safe; toggleKill.checked=!!opts.kill; toggleSort.checked=!!opts.sort; setOutputMode(!!opts.multiline); }
+  function currentOptionsSnapshot() {
+    return {
+      clearFirst: toggleClearFirst ? toggleClearFirst.checked : false,
+      safe: toggleSafe ? toggleSafe.checked : true,
+      kill: toggleKill ? toggleKill.checked : true,
+      sort: toggleSort ? toggleSort.checked : false,
+      multiline
+    };
+  }
+  function applyOptionsSnapshot(opts) {
+    if (!opts) return;
+
+    if (toggleClearFirst) toggleClearFirst.checked = !!opts.clearFirst;
+    if (toggleSafe) toggleSafe.checked = opts.safe !== false;
+    if (toggleKill) toggleKill.checked = opts.kill !== false;
+    if (toggleSort) toggleSort.checked = !!opts.sort;
+
+    setOutputMode(!!opts.multiline);
+  }
   function syncPresetButtons() { const id=presetSelect.value; loadPresetBtn.disabled=!id; overwritePresetBtn.disabled=!id; deletePresetBtn.disabled=!id; }
   function refreshPresetSelect() {
     const presets=readPresets().sort((a,b)=>a.name.localeCompare(b.name));
