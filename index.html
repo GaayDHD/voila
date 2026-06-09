@@ -1301,11 +1301,22 @@
     const empty = n === 0;
     emptyState.style.display = empty ? '' : 'none';
     listHint.style.display   = empty ? 'none' : '';
-    countBadge.innerHTML = `<strong>${n}</strong>&nbsp;/ 50 fonts`;
-    barCount.textContent = String(n); barCount.dataset.empty = empty ? 'true' : 'false';
-    navFontCount.textContent = `${n} font${n!==1?'s':''}`; navFontCount.dataset.empty = empty ? 'true' : 'false';
-    warnBadge.style.display = n > 50 ? '' : 'none';
-    if (n > 50) warnBadge.textContent = '⚠ Over 50 — Office may ignore extras';
+    if (countBadge) countBadge.innerHTML = `<strong>${n}</strong>&nbsp;/ 50 fonts`;
+
+    if (barCount) {
+      barCount.textContent = String(n);
+      barCount.dataset.empty = empty ? 'true' : 'false';
+    }
+
+    if (navFontCount) {
+      navFontCount.textContent = `${n} font${n!==1?'s':''}`;
+      navFontCount.dataset.empty = empty ? 'true' : 'false';
+    }
+
+    if (warnBadge) {
+      warnBadge.style.display = n > 50 ? '' : 'none';
+      if (n > 50) warnBadge.textContent = '⚠ Over 50 — Office may ignore extras';
+    }
     copyBtn.disabled = downloadBtn.disabled = empty;
     kbdHint.style.display = empty ? 'none' : '';
   }
@@ -1348,6 +1359,7 @@
   /* ── UPDATE ALL ── */
   function updateAll() {
     psNames = dedupePreserveOrder(psNames);
+    updateLayoutState();
     updateLayoutState();
     if (toggleSort.checked) psNames = autoSortByWeight(psNames);
     renderList();
@@ -1469,7 +1481,7 @@
   importFile.addEventListener('change', async () => { const f=importFile.files&&importFile.files[0]; importFile.value=''; if(!f) return; await importPresetsFromFile(f); });
 
   /* ── SORTABLE ── */
-  new Sortable(psList, {
+  if (window.Sortable && psList) new Sortable(psList, {
     animation: 180, handle: '.handle',
     ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
     onStart: () => pushUndo('Reorder'),
