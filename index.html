@@ -1067,6 +1067,389 @@
     }
   }
 
+
+  /* Ligature Explorer styling parity for shared UI elements */
+  :root {
+    --muted2: rgba(29,29,31,.44);
+    --card-solid: #ffffff;
+    --stroke2: rgba(29,29,31,.13);
+    --shadow: 0 2px 24px rgba(0,0,0,.06), 0 24px 80px rgba(0,0,0,.08);
+    --shadow2: 0 2px 8px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
+    --radius: 20px;
+    --radius-sm: 14px;
+    --orange: #FF9500;
+  }
+
+  body {
+    background: var(--bg);
+  }
+
+  .wrap,
+  body.embed-mode .wrap {
+    max-width: 1080px;
+    padding: 48px 24px 40px;
+  }
+
+  .grid {
+    gap: 20px;
+    align-items: start;
+  }
+
+  .card {
+    border-radius: var(--radius);
+    border: 1px solid var(--stroke);
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    opacity: 1;
+    transform: none;
+    transition: box-shadow .2s ease, border-color .2s ease, transform .08s ease;
+  }
+
+  .card.visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow);
+    border-color: var(--stroke);
+    transform: none;
+  }
+
+  .card .bar {
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--stroke);
+    background: color-mix(in oklab, var(--card) 55%, transparent);
+    flex-shrink: 0;
+  }
+
+  .bar-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bar .title,
+  .section-title {
+    font-size: 11px;
+    letter-spacing: .06em;
+    font-weight: 700;
+    color: var(--muted2);
+    text-transform: uppercase;
+  }
+
+  .bar-count {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    background: color-mix(in oklab, var(--blue) 12%, var(--card));
+    border: 1px solid color-mix(in oklab, var(--blue) 18%, var(--stroke));
+    color: var(--blue);
+    transition: opacity .2s, transform .2s;
+  }
+
+  .bar-count[data-empty="true"] {
+    opacity: .55;
+    transform: scale(.92);
+  }
+
+  .card .body {
+    padding: 20px;
+  }
+
+  .command-card .body {
+    padding-top: 14px;
+  }
+
+  .grid.has-fonts .font-card .body {
+    min-height: 0;
+    display: block;
+    padding: 30px 20px 20px;
+  }
+
+  .dropzone {
+    border: 1.5px dashed var(--stroke2);
+    border-radius: var(--radius);
+    padding: 32px 20px;
+    text-align: center;
+    background: color-mix(in oklab, var(--card) 50%, transparent);
+    transition: border-color .2s ease, background .2s ease, transform .15s ease;
+  }
+
+  .dropzone:hover {
+    border-color: color-mix(in oklab, var(--blue) 35%, var(--stroke2));
+    background: color-mix(in oklab, var(--blue) 4%, var(--card));
+    box-shadow: none;
+  }
+
+  .dropzone.dragover {
+    border-color: var(--blue);
+    background: color-mix(in oklab, var(--blue) 8%, var(--card));
+    transform: scale(1.01);
+    box-shadow: none;
+  }
+
+  .drop-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 14px;
+    border-radius: 14px;
+    background: color-mix(in oklab, var(--blue) 12%, var(--card));
+    border: 1px solid color-mix(in oklab, var(--blue) 18%, var(--stroke));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--blue);
+  }
+
+  .dropzone .big {
+    font-weight: 600;
+    font-size: 15px;
+    letter-spacing: -.01em;
+    margin-bottom: 6px;
+  }
+
+  .dropzone .small {
+    font-size: 12.5px;
+    color: var(--muted2);
+    line-height: 1.55;
+  }
+
+  button,
+  .button {
+    appearance: none;
+    border: 1px solid var(--stroke2);
+    background: color-mix(in oklab, var(--card-solid) 94%, transparent);
+    color: var(--text);
+    border-radius: 999px;
+    padding: 9px 16px;
+    font-family: var(--sans);
+    font-weight: 500;
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    letter-spacing: -.01em;
+    transition: background .15s ease, border-color .15s ease, transform .08s ease, box-shadow .15s ease;
+  }
+
+  button:hover,
+  .button:hover {
+    background: var(--card-solid);
+    box-shadow: var(--shadow2);
+  }
+
+  button:active,
+  .button:active {
+    transform: scale(.97);
+  }
+
+  button.primary,
+  .button.primary {
+    background: var(--blue);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: none;
+  }
+
+  button.primary:hover,
+  .button.primary:hover {
+    background: var(--blue-hover);
+    box-shadow: 0 4px 20px color-mix(in oklab, var(--blue) 32%, transparent);
+  }
+
+  button.destructive {
+    border-color: color-mix(in oklab, var(--red) 30%, var(--stroke));
+    color: var(--red);
+    background: color-mix(in oklab, var(--red) 8%, var(--card-solid));
+  }
+
+  button.destructive:hover {
+    background: color-mix(in oklab, var(--red) 12%, var(--card-solid));
+    box-shadow: none;
+  }
+
+  button:disabled,
+  .button[aria-disabled="true"] {
+    opacity: .38;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  pre,
+  textarea,
+  select,
+  input[type="text"] {
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--stroke2);
+    background: color-mix(in oklab, var(--card-solid) 82%, transparent);
+    color: var(--text);
+  }
+
+  pre {
+    background: color-mix(in oklab, var(--card-solid) 78%, transparent);
+  }
+
+  textarea:focus,
+  select:focus,
+  input[type="text"]:focus {
+    border-color: color-mix(in oklab, var(--blue) 55%, var(--stroke2));
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--blue) 12%, transparent);
+  }
+
+  .item {
+    border-radius: 14px;
+    border: 1px solid var(--stroke);
+    background: color-mix(in oklab, var(--card-solid) 78%, transparent);
+    transition: background .12s ease, border-color .12s ease;
+  }
+
+  .item:hover {
+    background: color-mix(in oklab, var(--card-solid) 96%, transparent);
+    border-color: color-mix(in oklab, var(--blue) 28%, var(--stroke));
+  }
+
+  .hint,
+  .kbd-hint {
+    color: var(--muted2);
+  }
+
+  kbd {
+    border: 1px solid var(--stroke2);
+    background: color-mix(in oklab, var(--card-solid) 82%, transparent);
+    color: var(--muted);
+    box-shadow: none;
+  }
+
+  .sub-card {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--stroke);
+    background: color-mix(in oklab, var(--card-solid) 62%, transparent);
+  }
+
+  .sub-card:first-child {
+    margin-top: 0;
+  }
+
+  .sub-card .section-title:first-child {
+    margin-top: 0;
+  }
+
+  .step-num {
+    border: 1px solid color-mix(in oklab, var(--blue) 18%, var(--stroke));
+    background: color-mix(in oklab, var(--blue) 12%, var(--card));
+    color: var(--blue);
+  }
+
+  .toast {
+    background: color-mix(in oklab, var(--card-solid) 94%, transparent);
+    color: var(--text);
+    backdrop-filter: saturate(180%) blur(24px);
+    -webkit-backdrop-filter: saturate(180%) blur(24px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000000;
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.54);
+      --muted2: rgba(255,255,255,.38);
+      --card: rgba(28,28,30,.70);
+      --card-solid: #1c1c1e;
+      --stroke: rgba(255,255,255,.09);
+      --stroke2: rgba(255,255,255,.14);
+      --shadow: 0 2px 24px rgba(0,0,0,.3), 0 24px 80px rgba(0,0,0,.5);
+      --shadow2: 0 2px 8px rgba(0,0,0,.2), 0 8px 24px rgba(0,0,0,.3);
+    }
+
+    .card,
+    .font-card,
+    .command-card,
+    .sub-card {
+      background: var(--card);
+      border-color: var(--stroke);
+      box-shadow: var(--shadow);
+    }
+
+    .card .bar,
+    .bar {
+      background: color-mix(in oklab, var(--card) 55%, transparent);
+      border-color: var(--stroke);
+    }
+
+    .dropzone,
+    pre,
+    textarea,
+    select,
+    input[type="text"],
+    .item {
+      background: color-mix(in oklab, var(--card-solid) 78%, transparent) !important;
+      border-color: var(--stroke2) !important;
+      color: var(--text) !important;
+    }
+
+    .dropzone:hover {
+      background: color-mix(in oklab, var(--blue) 4%, var(--card)) !important;
+      border-color: color-mix(in oklab, var(--blue) 35%, var(--stroke2)) !important;
+    }
+
+    button,
+    .button {
+      background: color-mix(in oklab, var(--card-solid) 94%, transparent);
+      color: var(--text);
+      border-color: var(--stroke2);
+    }
+
+    button:hover,
+    .button:hover {
+      background: var(--card-solid);
+      box-shadow: var(--shadow2);
+    }
+
+    button.primary,
+    .button.primary {
+      background: var(--blue);
+      color: #fff;
+      border-color: transparent;
+    }
+
+    button.primary:hover,
+    .button.primary:hover {
+      background: var(--blue-hover);
+    }
+
+    button.destructive {
+      background: color-mix(in oklab, var(--red) 8%, var(--card-solid));
+      color: var(--red);
+      border-color: color-mix(in oklab, var(--red) 30%, var(--stroke));
+    }
+
+    kbd,
+    .step-num {
+      background: color-mix(in oklab, var(--blue) 12%, var(--card));
+      border-color: color-mix(in oklab, var(--blue) 18%, var(--stroke));
+      color: var(--blue);
+      box-shadow: none;
+    }
+
+    .toast {
+      background: color-mix(in oklab, var(--card-solid) 94%, transparent);
+      color: var(--text);
+    }
+  }
+
 </style>
 
   <script src="/vendor/opentype.min.js"></script>
