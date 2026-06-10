@@ -26,8 +26,8 @@
     --muted-2: #86868b;
     --stroke: #d2d2d7;
     --stroke-2: #e5e5ea;
-    --blue: #0071e3;
-    --blue-hover: #0077ed;
+    --blue: #6600ff;
+    --blue-hover: #5200cc;
     --red: #d70015;
     --green: #1d9b4d;
     --yellow: #b28704;
@@ -213,9 +213,9 @@
   }
   .card.visible { opacity: 1; transform: none; }
   .card:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,.04), 0 14px 36px rgba(0,0,0,.07);
-    border-color: #d9d9de;
-    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+    border-color: var(--stroke-2);
+    transform: none;
   }
   .card .bar {
     display: flex;
@@ -252,6 +252,19 @@
   .bar-count[data-empty="true"] { opacity: .45; }
   .card .body { padding: 20px; }
 
+  .command-card .body {
+    padding-top: 14px;
+  }
+
+  .command-card .body > .section-title:first-child {
+    margin-top: 0;
+  }
+
+  .command-card #cmdOut {
+    margin-top: 8px;
+  }
+
+
   .dropzone {
     border: 1px dashed #c7c7cc;
     border-radius: 18px;
@@ -261,9 +274,9 @@
     transition: border-color .18s ease, box-shadow .18s ease, background .18s ease, transform .18s ease;
   }
   .dropzone:hover {
-    border-color: #9cc7ff;
-    box-shadow: inset 0 0 0 1px rgba(0,113,227,.08);
-    background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%);
+    border-color: var(--stroke);
+    box-shadow: none;
+    background: linear-gradient(180deg, #ffffff 0%, #fafafc 100%);
   }
   .dropzone.dragover {
     border-color: var(--blue);
@@ -279,8 +292,8 @@
     align-items: center;
     justify-content: center;
     color: var(--blue);
-    background: #f2f7ff;
-    border: 1px solid #dce9ff;
+    background: color-mix(in oklab, var(--blue) 10%, var(--surface));
+    border: 1px solid color-mix(in oklab, var(--blue) 24%, var(--stroke-2));
   }
   .drop-icon svg { width: 22px; height: 22px; }
   .dropzone .big {
@@ -568,16 +581,35 @@
   kbd {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     min-height: 22px;
+    min-width: 22px;
     padding: 0 7px;
     border-radius: 6px;
     border: 1px solid var(--stroke);
-    background: #fff;
+    background: var(--surface);
     color: var(--muted);
     font-size: 10.5px;
     font-family: var(--sans);
     font-weight: 600;
     box-shadow: 0 1px 0 rgba(0,0,0,.03);
+  }
+
+
+  .sub-card {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 18px;
+    border: 1px solid var(--stroke-2);
+    background: color-mix(in oklab, var(--surface) 88%, transparent);
+  }
+
+  .sub-card:first-child {
+    margin-top: 0;
+  }
+
+  .sub-card .section-title:first-child {
+    margin-top: 0;
   }
 
   .steps {
@@ -599,8 +631,8 @@
     width: 24px;
     height: 24px;
     border-radius: 999px;
-    border: 1px solid #dbe8ff;
-    background: #f2f7ff;
+    border: 1px solid color-mix(in oklab, var(--blue) 28%, var(--stroke-2));
+    background: color-mix(in oklab, var(--blue) 12%, var(--surface));
     color: var(--blue);
     display: flex;
     align-items: center;
@@ -658,6 +690,7 @@
   }
 
   button:focus-visible,
+  .button:focus-visible,
   select:focus-visible,
   textarea:focus-visible,
   input[type="text"]:focus-visible {
@@ -893,6 +926,14 @@
     display: block;
   }
 
+  /* App chrome hidden for compact layout */
+  .nav,
+  .hero,
+  .divider,
+  .footer {
+    display: none !important;
+  }
+
   body.embed-mode {
     background: transparent;
     min-height: auto;
@@ -907,6 +948,7 @@
     padding: 96px 24px 80px;
   }
 
+  .wrap,
   body.embed-mode .wrap {
     padding: 48px 24px 40px;
   }
@@ -921,8 +963,8 @@
       --muted-2: rgba(255,255,255,.42);
       --stroke: rgba(255,255,255,.14);
       --stroke-2: rgba(255,255,255,.09);
-      --blue: #2997FF;
-      --blue-hover: #47a6ff;
+      --blue: #6600ff;
+      --blue-hover: #7f33ff;
       --red: #FF453A;
       --green: #34C759;
       --purple: #DA8FFF;
@@ -968,8 +1010,9 @@
     }
 
     .dropzone:hover {
-      background: rgba(58,58,60,.76);
-      border-color: color-mix(in oklab, var(--blue) 45%, rgba(255,255,255,.18));
+      background: rgba(44,44,46,.68);
+      border-color: rgba(255,255,255,.18);
+      box-shadow: none;
     }
 
     input,
@@ -988,8 +1031,10 @@
       border-color: rgba(255,255,255,.16);
     }
 
-    button:hover {
-      background: rgba(58,58,60,.92);
+    button:hover,
+    .button:hover {
+      background: rgba(44,44,46,.82);
+      box-shadow: none;
     }
 
     button.primary,
@@ -1135,28 +1180,32 @@
           <kbd>⌘</kbd><kbd>⇧</kbd><kbd>C</kbd>&nbsp;to copy anywhere on the page
         </div>
 
-        <div class="section-title">Presets</div>
-        <div class="preset-grid">
-          <select id="presetSelect"><option value="">Select a preset…</option></select>
-          <button id="loadPresetBtn" disabled type="button">Load</button>
-        </div>
-        <div class="preset-grid">
-          <input id="presetName" type="text" placeholder="Preset name (e.g. Radian full set)" />
-          <button id="savePresetBtn" class="primary" type="button">Save</button>
-        </div>
-        <div class="preset-actions" style="margin-top:12px">
-          <button id="overwritePresetBtn" disabled type="button">Overwrite selected</button>
-          <button id="deletePresetBtn" class="destructive" disabled type="button">Delete</button>
-          <button id="exportPresetsBtn" type="button">Export</button>
-          <button id="importPresetsBtn" type="button">Import</button>
-          <input id="importFile" type="file" accept=".json" />
+        <div class="sub-card presets-card">
+          <div class="section-title">Presets</div>
+          <div class="preset-grid">
+            <select id="presetSelect"><option value="">Select a preset…</option></select>
+            <button id="loadPresetBtn" disabled type="button">Load</button>
+          </div>
+          <div class="preset-grid">
+            <input id="presetName" type="text" placeholder="Preset name (e.g. Radian full set)" />
+            <button id="savePresetBtn" class="primary" type="button">Save</button>
+          </div>
+          <div class="preset-actions" style="margin-top:12px">
+            <button id="overwritePresetBtn" disabled type="button">Overwrite selected</button>
+            <button id="deletePresetBtn" class="destructive" disabled type="button">Delete</button>
+            <button id="exportPresetsBtn" type="button">Export</button>
+            <button id="importPresetsBtn" type="button">Import</button>
+            <input id="importFile" type="file" accept=".json" />
+          </div>
         </div>
 
-        <div class="section-title">How to apply</div>
-        <div class="steps">
-          <div class="step"><div class="step-num">1</div><span>Quit Word and PowerPoint completely</span></div>
-          <div class="step"><div class="step-num">2</div><span>Run the generated command in Terminal</span></div>
-          <div class="step"><div class="step-num">3</div><span>Open Office → quit → reopen once to refresh</span></div>
+        <div class="sub-card how-card">
+          <div class="section-title">How to apply</div>
+          <div class="steps">
+            <div class="step"><div class="step-num">1</div><span>Quit Word and PowerPoint completely</span></div>
+            <div class="step"><div class="step-num">2</div><span>Run the generated command in Terminal</span></div>
+            <div class="step"><div class="step-num">3</div><span>Open Office → quit → reopen once to refresh</span></div>
+          </div>
         </div>
       </div>
     </div>
