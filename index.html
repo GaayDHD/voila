@@ -1450,6 +1450,27 @@
     }
   }
 
+
+  @media (prefers-color-scheme: dark) {
+    .bar-count,
+    kbd,
+    .step-num {
+      background: color-mix(in oklab, var(--blue) 22%, rgba(255,255,255,.08)) !important;
+      border-color: color-mix(in oklab, var(--blue) 48%, rgba(255,255,255,.18)) !important;
+      color: #b88cff !important;
+    }
+
+    .drop-icon {
+      background: color-mix(in oklab, var(--blue) 24%, rgba(255,255,255,.08)) !important;
+      border-color: color-mix(in oklab, var(--blue) 48%, rgba(255,255,255,.18)) !important;
+      color: #b88cff !important;
+    }
+
+    .bar-count {
+      box-shadow: 0 0 0 1px color-mix(in oklab, var(--blue) 18%, transparent);
+    }
+  }
+
 </style>
 
   <script src="/vendor/opentype.min.js"></script>
