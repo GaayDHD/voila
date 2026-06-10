@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Voilà</title>
 
-  
 <style>
   @font-face {
     font-family: "Robinco";
@@ -16,8 +15,9 @@
     font-display: swap;
   }
 
+
   :root {
-    color-scheme: light dark;
+    color-scheme: light;
     --bg: #f5f5f7;
     --surface: #ffffff;
     --surface-2: #fbfbfd;
@@ -30,8 +30,6 @@
     --blue-hover: #0077ed;
     --red: #d70015;
     --green: #1d9b4d;
-    --purple: #BF5AF2;
-    --card: rgba(255,255,255,.82);
     --yellow: #b28704;
     --shadow: 0 1px 2px rgba(0,0,0,.04), 0 8px 28px rgba(0,0,0,.05);
     --shadow-soft: 0 1px 2px rgba(0,0,0,.03), 0 4px 14px rgba(0,0,0,.04);
@@ -53,7 +51,9 @@
     min-height: 100vh;
     font-family: var(--sans);
     color: var(--text);
-    background: var(--bg);
+    background:
+      radial-gradient(circle at top, rgba(0,113,227,.06), transparent 32%),
+      linear-gradient(180deg, #fbfbfd 0%, var(--bg) 22%, var(--bg) 100%);
   }
 
   .nav {
@@ -64,24 +64,41 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: color-mix(in oklab, var(--bg) 78%, transparent);
-    backdrop-filter: saturate(180%) blur(20px);
-    -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 1px solid var(--stroke-2);
+    background: rgba(255,255,255,.78);
+    backdrop-filter: saturate(180%) blur(18px);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    border-bottom: 1px solid rgba(210,210,215,.72);
   }
   .nav-inner {
     width: 100%;
-    max-width: 1080px;
+    max-width: 1040px;
     padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 14px;
   }
   .nav-brand {
-    display: none;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    color: var(--text);
+    text-decoration: none;
   }
-  .nav-right {
-    display: none;
+  .nav-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+  .nav-pill,
+  .nav-font-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+    background: rgba(255,255,255,.92);
+    border: 1px solid var(--stroke-2);
+    color: var(--muted);
   }
   .nav-font-count {
     color: var(--blue);
@@ -97,48 +114,11 @@
 
   .hero {
     text-align: center;
-    padding: 96px 24px 80px;
+    padding: 64px 24px 32px;
     position: relative;
-    overflow: hidden;
   }
-  .hero-blobs {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    overflow: hidden;
-  }
-  .blob {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(72px);
-    animation: drift 14s ease-in-out infinite alternate;
-  }
-  .blob-1 {
-    width: 700px;
-    height: 440px;
-    top: -120px;
-    left: -80px;
-    background: color-mix(in oklab, var(--blue) 14%, transparent);
-    animation-duration: 16s;
-  }
-  .blob-2 {
-    width: 600px;
-    height: 380px;
-    top: -60px;
-    right: -100px;
-    background: color-mix(in oklab, var(--purple) 9%, transparent);
-    animation-duration: 12s;
-    animation-delay: -4s;
-  }
-  .blob-3 {
-    width: 500px;
-    height: 300px;
-    bottom: -80px;
-    left: 30%;
-    background: color-mix(in oklab, var(--green) 9%, transparent);
-    animation-duration: 18s;
-    animation-delay: -8s;
-  }
+  .hero-blobs,
+  .blob { display: none; }
   .hero-eyebrow {
     display: inline-flex;
     align-items: center;
@@ -155,35 +135,26 @@
     margin-bottom: 20px;
   }
   .hero h1 {
-    font-family: "Robinco", var(--sans);
-    font-size: clamp(54.6px, 9.1vw, 101.4px);
-    font-weight: 400;
+    max-width: 14ch;
+    margin: 0 auto 14px;
+    font-size: clamp(36px, 6vw, 62px);
     line-height: 1.04;
-    max-width: 18ch;
-    margin: 0 auto 24px;
-    animation: fadeUp .65s .08s ease both;
-    position: relative;
-    z-index: 1;
+    letter-spacing: -.04em;
+    font-weight: 700;
   }
   .hero h1 em {
-    font-weight: 400;
-    font-family: "Robinco", var(--sans);
     font-style: normal;
-    background: linear-gradient(135deg, var(--blue) 0%, color-mix(in oklab, var(--blue) 50%, var(--purple)) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--text);
+    background: none;
+    -webkit-text-fill-color: initial;
   }
   .hero-sub {
-    font-size: 19px;
-    line-height: 1.52;
+    max-width: 43ch;
+    margin: 0 auto 24px;
     color: var(--muted);
-    max-width: 48ch;
-    margin: 0 auto 40px;
-    font-weight: 400;
-    animation: fadeUp .65s .14s ease both;
-    position: relative;
-    z-index: 1;
+    font-size: 19px;
+    line-height: 1.45;
+    letter-spacing: -.01em;
   }
   .hero-badges {
     display: flex;
@@ -206,9 +177,18 @@
   }
   .badge strong { color: var(--text); font-weight: 600; }
 
-  .divider { height: 1px; background: var(--stroke); }
+  .divider {
+    max-width: 1040px;
+    height: 1px;
+    margin: 0 auto;
+    background: linear-gradient(90deg, transparent 0%, var(--stroke) 12%, var(--stroke) 88%, transparent 100%);
+  }
 
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 48px 24px 96px; }
+  .wrap {
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 28px 24px 88px;
+  }
   .grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -216,7 +196,7 @@
   }
   @media (max-width: 920px) {
     .grid { grid-template-columns: 1fr; }
-    .hero { padding: 96px 24px 80px; }
+    .hero { padding-top: 48px; }
   }
 
   .card {
@@ -669,9 +649,6 @@
     font-size: 12px;
   }
 
-  @keyframes fadeUp  { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-  @keyframes drift   { from { transform: translate(0,0) scale(1); } to { transform: translate(40px,30px) scale(1.08); } }
-
   @keyframes toastIn {
     from { opacity: 0; transform: translateY(10px) scale(.96); }
     to { opacity: 1; transform: translateY(0) scale(1); }
@@ -689,13 +666,132 @@
   }
 
 
-  /* Pre-upload layout */
+  /* Voilà branding and cleaned workflow */
+  :root {
+    color-scheme: light dark;
+    --purple: #BF5AF2;
+  }
+
+  body {
+    background: var(--bg);
+  }
+
+  .nav-brand,
+  .nav-right,
+  .hero-eyebrow,
+  .hero-badges,
+  .controls,
+  .manual-hidden,
+  #mergeManualBtn,
+  #manualBox,
+  #errors,
+  #outOne,
+  #outMulti,
+  #toggleClearFirst,
+  #toggleSafe,
+  #toggleKill,
+  #toggleSort {
+    display: none !important;
+  }
+
+  .nav-inner {
+    max-width: 1080px;
+  }
+
+  .hero {
+    padding: 96px 24px 80px;
+    overflow: hidden;
+  }
+
+  .hero-blobs {
+    display: block;
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .blob {
+    display: block;
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(72px);
+    animation: drift 14s ease-in-out infinite alternate;
+  }
+
+  .blob-1 {
+    width: 700px;
+    height: 440px;
+    top: -120px;
+    left: -80px;
+    background: color-mix(in oklab, var(--blue) 14%, transparent);
+    animation-duration: 16s;
+  }
+
+  .blob-2 {
+    width: 600px;
+    height: 380px;
+    top: -60px;
+    right: -100px;
+    background: color-mix(in oklab, var(--purple) 9%, transparent);
+    animation-duration: 12s;
+    animation-delay: -4s;
+  }
+
+  .blob-3 {
+    width: 500px;
+    height: 300px;
+    bottom: -80px;
+    left: 30%;
+    background: color-mix(in oklab, var(--green) 9%, transparent);
+    animation-duration: 18s;
+    animation-delay: -8s;
+  }
+
+  .hero h1 {
+    font-family: "Robinco", var(--sans);
+    font-size: clamp(54.6px, 9.1vw, 101.4px);
+    font-weight: 400;
+    letter-spacing: 0;
+    max-width: 18ch;
+    margin: 0 auto 24px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero h1 em {
+    font-family: "Robinco", var(--sans);
+    font-weight: 400;
+    font-style: normal;
+    background: linear-gradient(135deg, var(--blue) 0%, color-mix(in oklab, var(--blue) 50%, var(--purple)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero-sub {
+    font-weight: 400;
+    position: relative;
+    z-index: 1;
+  }
+
+  .divider {
+    max-width: none;
+    background: var(--stroke);
+  }
+
+  .wrap {
+    max-width: 1080px;
+    padding: 48px 24px 96px;
+  }
+
   .grid.pre-upload {
     grid-template-columns: 1fr;
   }
 
-  .grid.pre-upload .command-card {
-    display: none;
+  .grid.pre-upload .command-card,
+  .command-card[hidden] {
+    display: none !important;
   }
 
   .grid.pre-upload .font-card {
@@ -753,23 +849,49 @@
     margin-top: 26px;
   }
 
-  .grid.pre-upload #chooseBtn,
-  .grid.pre-upload #mergeManualBtn {
+  .grid.pre-upload #chooseBtn {
     padding: 0 22px;
     min-height: 42px;
     font-size: 15px;
   }
 
-  .grid.pre-upload .controls,
   .grid.pre-upload .section-title,
   .grid.pre-upload #psList,
   .grid.pre-upload #emptyState,
-  .grid.pre-upload #listHint,
-  .grid.pre-upload #manualBox,
-  .grid.pre-upload #errors {
+  .grid.pre-upload #listHint {
     display: none !important;
   }
 
+  .grid.has-fonts {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .grid.has-fonts .command-card {
+    display: block;
+  }
+
+  .grid.has-fonts .font-card .bar {
+    display: flex;
+  }
+
+  .grid.has-fonts .font-card .body {
+    min-height: 0;
+    display: block;
+    padding: 20px;
+  }
+
+  .grid.has-fonts #dropzone {
+    width: 100%;
+    min-height: 0;
+    display: block;
+    border-radius: 18px;
+    border-width: 1px;
+  }
+
+  .grid.has-fonts #psList,
+  .grid.has-fonts #listHint {
+    display: block;
+  }
 
   body.embed-mode {
     background: transparent;
@@ -785,20 +907,9 @@
     padding: 96px 24px 80px;
   }
 
-
-  body.embed-mode .grid.pre-upload .font-card .body {
-    min-height: 52vh;
-  }
-
-  body.embed-mode .grid.pre-upload #dropzone {
-    min-height: 42vh;
-  }
-
-
   body.embed-mode .wrap {
     padding: 48px 24px 40px;
   }
-
 
   @media (prefers-color-scheme: dark) {
     :root {
@@ -825,87 +936,29 @@
       --syn-kill: #FF9F0A;
       --syn-chain: rgba(255,255,255,.42);
     }
-  }
 
-
-  @media (prefers-color-scheme: dark) {
-    input,
-    select,
-    textarea {
-      background: rgba(28,28,30,.86);
-      color: var(--text);
-      border-color: var(--stroke);
-    }
-
-    button {
-      background: rgba(44,44,46,.82);
-      color: var(--text);
-      border-color: var(--stroke);
-    }
-
-    button.primary,
-    .primary {
-      background: var(--blue);
-      color: #fff;
-      border-color: transparent;
-    }
-
-    .dropzone,
-    .command-box,
-    pre,
-    code {
-      background: rgba(28,28,30,.72);
-      color: var(--text);
-      border-color: var(--stroke);
-    }
-  }
-
-
-  /* Strong dark-mode polish for embedded app */
-  @media (prefers-color-scheme: dark) {
     html,
-    body {
+    body,
+    .hero,
+    .wrap,
+    .footer {
       background: #000000;
       color: var(--text);
-    }
-
-    .hero {
-      background: #000000;
-    }
-
-    .divider {
-      background: rgba(255,255,255,.12);
-    }
-
-    .wrap {
-      background: #000000;
     }
 
     .card,
-    .panel,
     .font-card,
-    .command-card,
-    .results-card {
+    .command-card {
       background: rgba(28,28,30,.78);
       border-color: rgba(255,255,255,.12);
       box-shadow: 0 2px 24px rgba(0,0,0,.35), 0 24px 80px rgba(0,0,0,.55);
     }
 
     .card .bar,
-    .bar,
-    .panel-header,
-    .card-header {
+    .bar {
       background: rgba(44,44,46,.72);
       border-color: rgba(255,255,255,.10);
       color: var(--text);
-    }
-
-    .title,
-    .section-title,
-    .label,
-    .muted,
-    .hint {
-      color: rgba(255,255,255,.54);
     }
 
     .dropzone {
@@ -919,33 +972,14 @@
       border-color: color-mix(in oklab, var(--blue) 45%, rgba(255,255,255,.18));
     }
 
-    .dropzone .small,
-    .small {
-      color: rgba(255,255,255,.48);
-    }
-
-    .drop-icon {
-      background: color-mix(in oklab, var(--blue) 18%, rgba(28,28,30,.9));
-      border-color: color-mix(in oklab, var(--blue) 28%, rgba(255,255,255,.14));
-      color: var(--blue);
-    }
-
     input,
     select,
     textarea,
-    .command-box,
-    .generated-command,
-    .code-box,
     pre,
     code {
       background: rgba(28,28,30,.88) !important;
       color: rgba(255,255,255,.88) !important;
       border-color: rgba(255,255,255,.16) !important;
-    }
-
-    input::placeholder,
-    textarea::placeholder {
-      color: rgba(255,255,255,.34);
     }
 
     button {
@@ -965,13 +999,6 @@
       border-color: transparent;
     }
 
-    button.secondary,
-    .secondary {
-      background: rgba(58,58,60,.74);
-      color: rgba(255,255,255,.82);
-      border-color: rgba(255,255,255,.16);
-    }
-
     button.destructive,
     .destructive {
       background: color-mix(in oklab, var(--red) 14%, rgba(28,28,30,.9));
@@ -979,36 +1006,36 @@
       border-color: color-mix(in oklab, var(--red) 34%, rgba(255,255,255,.12));
     }
 
-    .pill,
-    .chip,
-    .toggle,
-    .badge,
-    .nav-pill,
+    .item {
+      background: rgba(28,28,30,.72);
+      border-color: rgba(255,255,255,.12);
+    }
+
     .bar-count,
-    .font-count {
+    .badge,
+    .toggle,
+    .nav-pill,
+    .nav-font-count {
       background: rgba(44,44,46,.74);
       color: rgba(255,255,255,.72);
       border-color: rgba(255,255,255,.14);
-    }
-
-    .footer {
-      background: #000000;
-      border-color: rgba(255,255,255,.10);
-      color: rgba(255,255,255,.42);
     }
   }
 
 </style>
 
-
-  
+  <script src="/vendor/opentype.min.js"></script>
+  <script src="/vendor/Sortable.min.js"></script>
 </head>
 <body>
 
 <nav class="nav">
   <div class="nav-inner">
-    <span class="nav-brand"></span>
-    <div class="nav-right"></div>
+    <span class="nav-brand">Font Prioritiser by Lorem Ipsum Creative</span>
+    <div class="nav-right">
+      <div id="navFontCount" class="nav-font-count" data-empty="true">0 fonts</div>
+      <div class="nav-pill"><span class="nav-dot"></span>macOS · Office 365</div>
+    </div>
   </div>
 </nav>
 
@@ -1018,8 +1045,13 @@
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
   </div>
+  <div class="hero-eyebrow">macOS utility</div>
   <h1><em>VOILA</em></h1>
   <p class="hero-sub">Font Prioritiser for Microsoft Office</p>
+  <div class="hero-badges" style="display:none">
+    <div id="countBadge" class="badge"><strong>0</strong>&nbsp;/ 50 fonts</div>
+    <div id="warnBadge" class="badge" style="display:none; color:var(--red);">⚠ Over limit</div>
+  </div>
 </section>
 
 <div class="divider"></div>
@@ -1034,8 +1066,8 @@
           <div id="barCount" class="bar-count" data-empty="true">0</div>
         </div>
         <div class="preset-actions">
-          <button id="undoBtn" style="display:none">↩ Undo</button>
-          <button id="clearBtn">Clear all</button>
+          <button id="undoBtn" style="display:none" type="button">↩ Undo</button>
+          <button id="clearBtn" type="button">Clear all</button>
         </div>
       </div>
       <div class="body">
@@ -1051,11 +1083,21 @@
           <div class="small">TTC/OTC collections may need manual mode.</div>
           <div class="row">
             <input id="fileInput" type="file" multiple accept=".otf,.ttf,.ttc,.otc" />
-            <button id="chooseBtn" class="primary">Choose fonts</button>
-            <button id="mergeManualBtn">Merge manual</button>
+            <button id="chooseBtn" class="primary" type="button">Choose fonts</button>
+            <button id="mergeManualBtn" class="manual-hidden" type="button">Merge manual</button>
           </div>
         </div>
 
+        <div class="controls manual-hidden">
+          <label class="toggle"><input id="toggleClearFirst" type="checkbox" /> Clear existing first</label>
+          <label class="toggle"><input id="toggleSafe" type="checkbox" checked /> Safe chaining (&&)</label>
+          <label class="toggle"><input id="toggleKill" type="checkbox" checked /> Quit Word + PowerPoint</label>
+          <label class="toggle"><input id="toggleSort" type="checkbox" /> Auto-sort by weight</label>
+          <div class="seg" aria-label="Output mode">
+            <button id="outOne" class="active" type="button">One-line</button>
+            <button id="outMulti" type="button">Multi-line</button>
+          </div>
+        </div>
 
         <div class="section-title">PostScript names <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--muted-2)">— drag to reorder</span></div>
         <ul id="psList" class="list"></ul>
@@ -1069,10 +1111,12 @@
             <path d="M60 55v10M55 60h10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
           </svg>
           <div class="empty-state-title">No fonts yet</div>
-          <div class="empty-state-sub">Drop font files above or paste PostScript names manually below.</div>
+          <div class="empty-state-sub">Drop font files above.</div>
         </div>
         <div class="hint" id="listHint" style="display:none">Priority flows top to bottom. Duplicates removed automatically.</div>
 
+        <textarea id="manualBox" class="manual-hidden" rows="5" placeholder="Paste PostScript names here, one per line."></textarea>
+        <div id="errors" class="errors muted manual-hidden">None.</div>
       </div>
     </div>
 
@@ -1080,13 +1124,13 @@
       <div class="bar">
         <div class="bar-left"><div class="title">Command &amp; Presets</div></div>
         <div class="preset-actions">
-          <button id="copyBtn" class="primary" disabled>Copy</button>
-          <button id="downloadBtn" disabled>Download .sh</button>
+          <button id="copyBtn" class="primary" disabled type="button">Copy</button>
+          <button id="downloadBtn" disabled type="button">Download .sh</button>
         </div>
       </div>
       <div class="body">
         <div class="section-title">Generated command</div>
-        <pre id="cmdOut">(Drop fonts or add PostScript names to generate a command.)</pre>
+        <pre id="cmdOut">(Drop fonts to generate a command.)</pre>
         <div class="kbd-hint" id="kbdHint" style="display:none">
           <kbd>⌘</kbd><kbd>⇧</kbd><kbd>C</kbd>&nbsp;to copy anywhere on the page
         </div>
@@ -1094,17 +1138,17 @@
         <div class="section-title">Presets</div>
         <div class="preset-grid">
           <select id="presetSelect"><option value="">Select a preset…</option></select>
-          <button id="loadPresetBtn" disabled>Load</button>
+          <button id="loadPresetBtn" disabled type="button">Load</button>
         </div>
         <div class="preset-grid">
           <input id="presetName" type="text" placeholder="Preset name (e.g. Radian full set)" />
-          <button id="savePresetBtn" class="primary">Save</button>
+          <button id="savePresetBtn" class="primary" type="button">Save</button>
         </div>
         <div class="preset-actions" style="margin-top:12px">
-          <button id="overwritePresetBtn" disabled>Overwrite selected</button>
-          <button id="deletePresetBtn" class="destructive" disabled>Delete</button>
-          <button id="exportPresetsBtn">Export</button>
-          <button id="importPresetsBtn">Import</button>
+          <button id="overwritePresetBtn" disabled type="button">Overwrite selected</button>
+          <button id="deletePresetBtn" class="destructive" disabled type="button">Delete</button>
+          <button id="exportPresetsBtn" type="button">Export</button>
+          <button id="importPresetsBtn" type="button">Import</button>
           <input id="importFile" type="file" accept=".json" />
         </div>
 
@@ -1127,12 +1171,13 @@
 <div id="toast-container"></div>
 
 <script>
-
   const urlParams = new URLSearchParams(window.location.search);
   const isEmbedMode = urlParams.get('embed') === 'true';
   if (isEmbedMode) document.body.classList.add('embed-mode');
+
   /* ── ELEMENTS ── */
   const mainGrid    = document.getElementById('mainGrid');
+  const commandCard = document.querySelector('.command-card');
   const dropzone    = document.getElementById('dropzone');
   const fileInput   = document.getElementById('fileInput');
   const chooseBtn   = document.getElementById('chooseBtn');
@@ -1168,7 +1213,7 @@
   const importFile         = document.getElementById('importFile');
   const presetName         = document.getElementById('presetName');
 
-  const STORAGE_KEY = 'voila-presets-v1';
+  const STORAGE_KEY = 'office-font-prioritiser-presets-v1';
   let psNames   = [];
   let multiline = false;
   let undoStack = [];
@@ -1241,16 +1286,8 @@
   function dedupePreserveOrder(arr) { const s = new Set(); return arr.filter(x => { if(s.has(x)) return false; s.add(x); return true; }); }
 
   function setErrors(errs) {
-    if (!errorsBox) return;
-
-    if (!errs || !errs.length) {
-      errorsBox.className = 'errors muted';
-      errorsBox.textContent = 'None.';
-    } else {
-      errorsBox.className = 'errors';
-      errorsBox.textContent = errs.join('
-');
-    }
+    if (!errs || !errs.length) { errorsBox.className='errors muted'; errorsBox.textContent='None.'; }
+    else { errorsBox.className='errors'; errorsBox.textContent=errs.join('\n'); }
   }
 
   /* ── SYNTAX HIGHLIGHT ── */
@@ -1275,6 +1312,21 @@
     }).join('\n');
   }
 
+
+  function updateLayoutState() {
+    const hasFonts = psNames.length > 0;
+
+    if (mainGrid) {
+      mainGrid.classList.toggle('pre-upload', !hasFonts);
+      mainGrid.classList.toggle('has-fonts', hasFonts);
+    }
+
+    if (commandCard) {
+      commandCard.hidden = !hasFonts;
+      commandCard.style.display = hasFonts ? '' : 'none';
+    }
+  }
+
   /* ── RENDER LIST ── */
   function renderList() {
     psList.innerHTML = '';
@@ -1292,24 +1344,14 @@
 
     const n = psNames.length;
     const empty = n === 0;
+    updateLayoutState();
     emptyState.style.display = empty ? '' : 'none';
     listHint.style.display   = empty ? 'none' : '';
-    if (countBadge) countBadge.innerHTML = `<strong>${n}</strong>&nbsp;/ 50 fonts`;
-
-    if (barCount) {
-      barCount.textContent = String(n);
-      barCount.dataset.empty = empty ? 'true' : 'false';
-    }
-
-    if (navFontCount) {
-      navFontCount.textContent = `${n} font${n!==1?'s':''}`;
-      navFontCount.dataset.empty = empty ? 'true' : 'false';
-    }
-
-    if (warnBadge) {
-      warnBadge.style.display = n > 50 ? '' : 'none';
-      if (n > 50) warnBadge.textContent = '⚠ Over 50 — Office may ignore extras';
-    }
+    countBadge.innerHTML = `<strong>${n}</strong>&nbsp;/ 50 fonts`;
+    barCount.textContent = String(n); barCount.dataset.empty = empty ? 'true' : 'false';
+    navFontCount.textContent = `${n} font${n!==1?'s':''}`; navFontCount.dataset.empty = empty ? 'true' : 'false';
+    warnBadge.style.display = n > 50 ? '' : 'none';
+    if (n > 50) warnBadge.textContent = '⚠ Over 50 — Office may ignore extras';
     copyBtn.disabled = downloadBtn.disabled = empty;
     kbdHint.style.display = empty ? 'none' : '';
   }
@@ -1317,14 +1359,10 @@
   /* ── BUILD COMMAND ── */
   function buildCommand({ multiline=false }={}) {
     if (!psNames.length) return '';
-
-    const safeChaining = toggleSafe ? toggleSafe.checked : true;
-    const clearFirst = toggleClearFirst ? toggleClearFirst.checked : false;
-    const killOffice = toggleKill ? toggleKill.checked : true;
-    const joiner = safeChaining ? ' && ' : '; ';
+    const joiner = toggleSafe.checked ? ' && ' : '; ';
     const q = s => `"${s.replaceAll('"','\\"')}"`;
     const parts = [];
-    if (clearFirst) parts.push(`defaults delete com.microsoft.office PrioritizedFonts 2>/dev/null`);
+    if (toggleClearFirst.checked) parts.push(`defaults delete com.microsoft.office PrioritizedFonts 2>/dev/null`);
     if (!multiline) {
       parts.push(`defaults write com.microsoft.office PrioritizedFonts -array ${psNames.map(q).join(' ')}`);
     } else {
@@ -1332,12 +1370,12 @@
       psNames.forEach((n,i) => lines.push(`${q(n)}${i<psNames.length-1?' \\':''}`));
       parts.push(lines.join('\n'));
     }
-    if (killOffice) {
+    if (toggleKill.checked) {
       parts.push(`osascript -e 'tell application "Microsoft Word" to quit'`);
       parts.push(`osascript -e 'tell application "Microsoft PowerPoint" to quit'`);
     }
     if (!multiline) return parts.join(joiner);
-    const chain = safeChaining ? '&&' : ';';
+    const chain = toggleSafe.checked ? '&&' : ';';
     return parts.map((p,i) => {
       if (i===parts.length-1) return p;
       if (p.includes('\n')) { const arr=p.split('\n'); arr[arr.length-1]+=` \\\n${chain} `; return arr.join('\n'); }
@@ -1345,20 +1383,10 @@
     }).join('');
   }
 
-
-  function updateLayoutState() {
-    const hasFonts = psNames.length > 0;
-    if (mainGrid) {
-      mainGrid.classList.toggle('pre-upload', !hasFonts);
-    }
-  }
-
   /* ── UPDATE ALL ── */
   function updateAll() {
     psNames = dedupePreserveOrder(psNames);
-    updateLayoutState();
-    updateLayoutState();
-    if (toggleSort && toggleSort.checked) psNames = autoSortByWeight(psNames);
+    if (toggleSort.checked) psNames = autoSortByWeight(psNames);
     renderList();
     const cmd = buildCommand({ multiline });
     if (cmd) { cmdOut.innerHTML = highlight(cmd); }
@@ -1367,17 +1395,9 @@
   }
 
   /* ── OUTPUT MODE ── */
-  function setOutputMode(isMulti) {
-    multiline = isMulti;
-
-    if (outOne) outOne.classList.toggle('active', !multiline);
-    if (outMulti) outMulti.classList.toggle('active', multiline);
-
-    updateAll();
-  }
-
-  if (outOne) outOne.addEventListener('click', () => setOutputMode(false));
-  if (outMulti) outMulti.addEventListener('click', () => setOutputMode(true));
+  function setOutputMode(isMulti) { multiline=isMulti; outOne.classList.toggle('active',!multiline); outMulti.classList.toggle('active',multiline); updateAll(); }
+  outOne.addEventListener('click', () => setOutputMode(false));
+  outMulti.addEventListener('click', () => setOutputMode(true));
 
   /* ── DROP ── */
   dropzone.addEventListener('dragover', e => { e.preventDefault(); dropzone.classList.add('dragover'); });
@@ -1387,33 +1407,23 @@
   fileInput.addEventListener('change', async () => { const f=[...(fileInput.files||[])]; fileInput.value=''; if(f.length) await addFiles(f); });
 
   /* ── MANUAL ── */
-  if (mergeManualBtn && manualBox) {
-    mergeManualBtn.addEventListener('click', () => {
-      const lines = normaliseLines(manualBox.value);
-      if (!lines.length) return;
-
-      pushUndo('Merge manual');
-      psNames = dedupePreserveOrder([...psNames, ...lines]);
-      updateAll();
-
-      showToast(`Added ${lines.length} name${lines.length!==1?'s':''}`, 'success');
-    });
-  }
+  mergeManualBtn.addEventListener('click', () => {
+    const lines = normaliseLines(manualBox.value);
+    if (!lines.length) return;
+    pushUndo('Merge manual'); psNames=dedupePreserveOrder([...psNames,...lines]); updateAll();
+    showToast(`Added ${lines.length} name${lines.length!==1?'s':''}`, 'success');
+  });
 
   /* ── CLEAR ── */
   clearBtn.addEventListener('click', () => {
-    if (!psNames.length && !(manualBox && manualBox.value)) return;
+    if (!psNames.length && !manualBox.value) return;
     const n = psNames.length;
-    pushUndo('Clear all');
-    psNames = [];
-    if (manualBox) manualBox.value = '';
-    setErrors([]);
-    updateAll();
+    pushUndo('Clear all'); psNames=[]; manualBox.value=''; setErrors([]); updateAll();
     showToast(`Cleared ${n} font${n!==1?'s':''}`, 'info');
   });
 
   /* ── TOGGLES ── */
-  [toggleClearFirst, toggleSafe, toggleKill, toggleSort].filter(Boolean).forEach(el => el.addEventListener('change', updateAll));
+  [toggleClearFirst,toggleSafe,toggleKill,toggleSort].forEach(el => el.addEventListener('change', updateAll));
 
   /* ── COPY / DOWNLOAD ── */
   copyBtn.addEventListener('click', async () => {
@@ -1424,9 +1434,9 @@
   });
   downloadBtn.addEventListener('click', () => {
     const cmd = buildCommand({multiline}); if(!cmd) return;
-    const blob = new Blob([`#!/bin/zsh\n# Generated by Voilà\n# Steps: run this → Word and PowerPoint will be asked to quit → open → quit → reopen Office once\n\n${cmd}\n`], {type:'text/plain'});
+    const blob = new Blob([`#!/bin/zsh\n# Generated by Office Font Prioritiser\n# Steps: run this → Word and PowerPoint will be asked to quit → open → quit → reopen Office once\n\n${cmd}\n`], {type:'text/plain'});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download='voila-prioritise-fonts.sh'; document.body.appendChild(a); a.click(); a.remove();
+    const a = document.createElement('a'); a.href=url; a.download='prioritise-fonts.sh'; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
     showToast('Script downloaded', 'success');
   });
@@ -1434,25 +1444,8 @@
   /* ── PRESETS ── */
   function readPresets() { try { const r=localStorage.getItem(STORAGE_KEY); if(!r) return []; const p=JSON.parse(r); return Array.isArray(p)?p:[]; } catch { return []; } }
   function writePresets(p) { localStorage.setItem(STORAGE_KEY,JSON.stringify(p)); }
-  function currentOptionsSnapshot() {
-    return {
-      clearFirst: toggleClearFirst ? toggleClearFirst.checked : false,
-      safe: toggleSafe ? toggleSafe.checked : true,
-      kill: toggleKill ? toggleKill.checked : true,
-      sort: toggleSort ? toggleSort.checked : false,
-      multiline
-    };
-  }
-  function applyOptionsSnapshot(opts) {
-    if (!opts) return;
-
-    if (toggleClearFirst) toggleClearFirst.checked = !!opts.clearFirst;
-    if (toggleSafe) toggleSafe.checked = opts.safe !== false;
-    if (toggleKill) toggleKill.checked = opts.kill !== false;
-    if (toggleSort) toggleSort.checked = !!opts.sort;
-
-    setOutputMode(!!opts.multiline);
-  }
+  function currentOptionsSnapshot() { return {clearFirst:toggleClearFirst.checked,safe:toggleSafe.checked,kill:toggleKill.checked,sort:toggleSort.checked,multiline}; }
+  function applyOptionsSnapshot(opts) { if(!opts) return; toggleClearFirst.checked=!!opts.clearFirst; toggleSafe.checked=!!opts.safe; toggleKill.checked=!!opts.kill; toggleSort.checked=!!opts.sort; setOutputMode(!!opts.multiline); }
   function syncPresetButtons() { const id=presetSelect.value; loadPresetBtn.disabled=!id; overwritePresetBtn.disabled=!id; deletePresetBtn.disabled=!id; }
   function refreshPresetSelect() {
     const presets=readPresets().sort((a,b)=>a.name.localeCompare(b.name));
@@ -1485,7 +1478,7 @@
   function exportPresets() {
     const p=readPresets();
     const blob=new Blob([JSON.stringify(p,null,2)],{type:'application/json'});
-    const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='voila-presets.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
+    const url=URL.createObjectURL(blob), a=document.createElement('a'); a.href=url; a.download='office-font-prioritiser-presets.json'; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1500);
     showToast(`${p.length} preset${p.length!==1?'s':''} exported`, 'success');
   }
   async function importPresetsFromFile(file) {
@@ -1513,7 +1506,7 @@
   importFile.addEventListener('change', async () => { const f=importFile.files&&importFile.files[0]; importFile.value=''; if(!f) return; await importPresetsFromFile(f); });
 
   /* ── SORTABLE ── */
-  if (window.Sortable && psList) new Sortable(psList, {
+  new Sortable(psList, {
     animation: 180, handle: '.handle',
     ghostClass: 'sortable-ghost', dragClass: 'sortable-drag',
     onStart: () => pushUndo('Reorder'),
@@ -1571,7 +1564,9 @@
 
   /* ── INIT ── */
   refreshPresetSelect();
+  updateLayoutState();
   updateAll();
+
 </script>
 </body>
 </html>
