@@ -547,8 +547,8 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    font-family: var(--mono);
-    font-size: 12px;
+    font-family: var(--sans);
+    font-size: 12.5px;
   }
   @media (max-width: 920px) {
     .psname { max-width: 320px; }
@@ -891,9 +891,16 @@
     grid-template-columns: 1fr;
   }
 
-  .grid.pre-upload .command-card,
-  .command-card[hidden] {
+  .grid.pre-upload .col-right,
+  .col-right[hidden] {
     display: none !important;
+  }
+
+  .col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
   }
 
   .grid.pre-upload .font-card {
@@ -968,8 +975,8 @@
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
 
-  .grid.has-fonts .command-card {
-    display: block;
+  .grid.has-fonts .col-right {
+    display: flex;
   }
 
   .grid.has-fonts .font-card .bar {
@@ -1377,15 +1384,59 @@
   }
 
   .item {
-    border-radius: 14px;
-    border: 1px solid var(--stroke);
-    background: color-mix(in oklab, var(--card-solid) 78%, transparent);
-    transition: background .12s ease, border-color .12s ease;
+    padding: 5px 8px;
+    border-radius: 8px;
+    border: none;
+    background: transparent;
+    margin-bottom: 1px;
+    transition: background .12s ease;
   }
 
   .item:hover {
-    background: color-mix(in oklab, var(--card-solid) 96%, transparent);
-    border-color: color-mix(in oklab, var(--blue) 28%, var(--stroke));
+    background: color-mix(in oklab, var(--text) 6%, transparent);
+    border: none;
+  }
+
+  /* Compact circular remove button (replaces the red "Remove" pill) */
+  .remove-x {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    min-height: 16px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: color-mix(in oklab, var(--text) 16%, transparent);
+    color: var(--card-solid);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .12s ease, transform .08s ease;
+  }
+  .remove-x svg { width: 9px; height: 9px; display: block; }
+  .remove-x:hover {
+    background: var(--red);
+    box-shadow: none;
+    transform: none;
+  }
+  .remove-x:active { transform: scale(.9); }
+
+  /* Presets card: uniform control typography + a custom chevron whose
+     right inset mirrors the 15px left text padding */
+  .presets-card select,
+  .presets-card input[type="text"],
+  .presets-card button {
+    font-family: var(--sans);
+    font-size: 13px;
+  }
+  .presets-card select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5' stroke='%238a8a8f' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 15px center !important;
+    background-size: 12px 8px !important;
+    padding-right: 38px;
   }
 
   .hint,
@@ -1462,8 +1513,7 @@
     pre,
     textarea,
     select,
-    input[type="text"],
-    .item {
+    input[type="text"] {
       background: color-mix(in oklab, var(--card-solid) 78%, transparent) !important;
       border-color: var(--stroke2) !important;
       color: var(--text) !important;
@@ -1638,23 +1688,28 @@
       </div>
     </div>
 
-    <div class="card command-card">
-      <div class="bar">
-        <div class="bar-left"><div class="title">Command &amp; Presets</div></div>
-        <div class="preset-actions">
-          <button id="copyBtn" class="primary" disabled type="button">Copy</button>
-          <button id="downloadBtn" disabled type="button">Download .sh</button>
+    <div class="col-right" id="colRight">
+      <div class="card command-card">
+        <div class="bar">
+          <div class="bar-left"><div class="title">Generated command</div></div>
+          <div class="preset-actions">
+            <button id="copyBtn" class="primary" disabled type="button">Copy</button>
+            <button id="downloadBtn" disabled type="button">Download .sh</button>
+          </div>
+        </div>
+        <div class="body">
+          <pre id="cmdOut">(Drop fonts to generate a command.)</pre>
+          <div class="kbd-hint" id="kbdHint" style="display:none">
+            <kbd>⌘</kbd><kbd>⇧</kbd><kbd>C</kbd>&nbsp;to copy anywhere on the page
+          </div>
         </div>
       </div>
-      <div class="body">
-        <div class="section-title">Generated command</div>
-        <pre id="cmdOut">(Drop fonts to generate a command.)</pre>
-        <div class="kbd-hint" id="kbdHint" style="display:none">
-          <kbd>⌘</kbd><kbd>⇧</kbd><kbd>C</kbd>&nbsp;to copy anywhere on the page
-        </div>
 
-        <div class="sub-card presets-card">
-          <div class="section-title">Presets</div>
+      <div class="card presets-card">
+        <div class="bar">
+          <div class="bar-left"><div class="title">Presets</div></div>
+        </div>
+        <div class="body">
           <div class="preset-grid">
             <select id="presetSelect"><option value="">Select a preset…</option></select>
             <button id="loadPresetBtn" disabled type="button">Load</button>
@@ -1671,9 +1726,13 @@
             <input id="importFile" type="file" accept=".json" />
           </div>
         </div>
+      </div>
 
-        <div class="sub-card how-card">
-          <div class="section-title">How to apply</div>
+      <div class="card how-card">
+        <div class="bar">
+          <div class="bar-left"><div class="title">How to apply</div></div>
+        </div>
+        <div class="body">
           <div class="steps">
             <div class="step"><div class="step-num">1</div><span>Quit Word and PowerPoint completely</span></div>
             <div class="step"><div class="step-num">2</div><span>Run the generated command in Terminal</span></div>
@@ -1700,6 +1759,7 @@
   /* ── ELEMENTS ── */
   const mainGrid    = document.getElementById('mainGrid');
   const commandCard = document.querySelector('.command-card');
+  const colRight    = document.getElementById('colRight');
   const dropzone    = document.getElementById('dropzone');
   const fileInput   = document.getElementById('fileInput');
   const chooseBtn   = document.getElementById('chooseBtn');
@@ -1852,9 +1912,9 @@
       mainGrid.classList.toggle('has-fonts', hasFonts);
     }
 
-    if (commandCard) {
-      commandCard.hidden = !hasFonts;
-      commandCard.style.display = hasFonts ? '' : 'none';
+    if (colRight) {
+      colRight.hidden = !hasFonts;
+      colRight.style.display = hasFonts ? '' : 'none';
     }
   }
 
@@ -1868,7 +1928,9 @@
       const text = document.createElement('span'); text.className='psname'; text.textContent=name;
       left.append(handle, text);
       const right = document.createElement('div'); right.className='preset-actions';
-      const del = document.createElement('button'); del.className='destructive'; del.textContent='Remove';
+      const del = document.createElement('button'); del.className='remove-x'; del.type='button';
+      del.setAttribute('aria-label', `Remove ${name}`); del.title = 'Remove';
+      del.innerHTML = '<svg viewBox="0 0 10 10" fill="none" aria-hidden="true"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>';
       del.onclick = () => { pushUndo(`Remove "${name}"`); psNames=psNames.filter(n=>n!==name); updateAll(); showToast(`Removed ${name}`, 'info', 2000); };
       right.appendChild(del); li.append(left, right); psList.appendChild(li);
     });
