@@ -1590,6 +1590,66 @@
     }
   }
 
+  /* ── Responsive: stack the two columns and tighten chrome ── */
+  @media (max-width: 920px) {
+    .grid.has-fonts {
+      grid-template-columns: 1fr;
+    }
+    .grid.has-fonts .font-card .body {
+      padding: 24px 18px 18px;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .wrap,
+    body.embed-mode .wrap {
+      padding: 20px 14px 36px;
+    }
+    .grid,
+    .col-right {
+      gap: 14px;
+    }
+    .card .bar {
+      flex-wrap: wrap;
+      row-gap: 10px;
+      padding: 13px 16px;
+    }
+    /* When the bar wraps, let the actions span the full width and sit
+       below the title rather than clipping off the right edge */
+    .card .bar .preset-actions {
+      width: 100%;
+      justify-content: flex-end;
+    }
+    .card .body {
+      padding: 16px;
+    }
+    .grid.has-fonts .font-card .body {
+      padding: 18px 16px 16px;
+    }
+    /* Comfortable tap targets on touch screens */
+    .preset-actions button,
+    .preset-grid button,
+    #chooseBtn {
+      min-height: 40px;
+    }
+    .remove-x {
+      width: 22px;
+      height: 22px;
+      min-height: 22px;
+    }
+    .remove-x svg {
+      width: 11px;
+      height: 11px;
+    }
+    .psname {
+      font-size: 13px;
+    }
+    pre,
+    textarea {
+      font-size: 12px;
+    }
+  }
+
 </style>
 
   <script src="/vendor/opentype.min.js"></script>
