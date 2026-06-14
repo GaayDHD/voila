@@ -82,6 +82,12 @@
     --stroke-2: #e5e5ea;
     --blue: #6600ff;
     --blue-hover: #5200cc;
+    /* Purple-derived accent tints (match Finito's single-primary system) */
+    --accent-soft: color-mix(in oklab, var(--blue) 7%, var(--surface));
+    --accent-light: color-mix(in oklab, var(--blue) 13%, var(--surface));
+    --accent-border: color-mix(in oklab, var(--blue) 26%, var(--stroke-2));
+    --ring: 0 0 0 4px color-mix(in oklab, var(--blue) 16%, transparent);
+    --primary-shadow: 0 1px 2px color-mix(in oklab, var(--blue) 28%, transparent), 0 8px 22px color-mix(in oklab, var(--blue) 22%, transparent);
     --red: #d70015;
     --green: #1d9b4d;
     --yellow: #b28704;
@@ -107,7 +113,7 @@
     font-family: var(--sans);
     color: var(--text);
     background:
-      radial-gradient(circle at top, rgba(0,113,227,.06), transparent 32%),
+      radial-gradient(circle at top, color-mix(in oklab, var(--blue) 7%, transparent), transparent 32%),
       linear-gradient(180deg, #fbfbfd 0%, var(--bg) 22%, var(--bg) 100%);
   }
 
@@ -298,9 +304,9 @@
     height: 24px;
     padding: 0 8px;
     border-radius: 999px;
-    background: #eef4ff;
+    background: var(--accent-light);
     color: var(--blue);
-    border: 1px solid #d8e7ff;
+    border: 1px solid var(--accent-border);
     font-size: 11px;
     font-weight: 700;
   }
@@ -335,7 +341,7 @@
   }
   .dropzone.dragover {
     border-color: var(--blue);
-    box-shadow: 0 0 0 4px rgba(0,113,227,.08);
+    box-shadow: var(--ring);
     transform: translateY(-1px);
   }
   .drop-icon {
@@ -426,9 +432,15 @@
     border-color: transparent;
     background: var(--blue);
     color: #fff;
-    box-shadow: 0 1px 2px rgba(0,113,227,.16), 0 8px 22px rgba(0,113,227,.14);
+    box-shadow: var(--primary-shadow);
   }
   button.primary:hover { background: var(--blue-hover); }
+  button.primary.copied {
+    background: color-mix(in oklab, var(--green) 15%, var(--card-solid));
+    border-color: color-mix(in oklab, var(--green) 28%, var(--stroke));
+    color: var(--green);
+    box-shadow: none;
+  }
   button.destructive {
     color: var(--red);
     background: #fff;
@@ -490,7 +502,7 @@
   }
   .seg button:last-child { border-right: 0; }
   .seg button.active {
-    background: #eef4ff;
+    background: var(--accent-light);
     color: var(--blue);
     font-weight: 600;
   }
@@ -544,8 +556,8 @@
   .sortable-drag { opacity: 0 !important; }
   .sortable-ghost {
     opacity: 1 !important;
-    background: #f5f9ff !important;
-    border-color: #b8d6ff !important;
+    background: var(--accent-soft) !important;
+    border-color: var(--accent-border) !important;
     box-shadow: 0 8px 24px rgba(0,0,0,.08) !important;
   }
 
@@ -577,8 +589,8 @@
   textarea:focus,
   select:focus,
   input[type="text"]:focus {
-    border-color: #9cc7ff;
-    box-shadow: 0 0 0 4px rgba(0,113,227,.08);
+    border-color: var(--blue);
+    box-shadow: var(--ring);
   }
   select {
     font-size: 13px;
@@ -751,7 +763,7 @@
   select:focus-visible,
   textarea:focus-visible,
   input[type="text"]:focus-visible {
-    outline: 3px solid rgba(0,113,227,.22);
+    outline: 3px solid color-mix(in oklab, var(--blue) 38%, transparent);
     outline-offset: 2px;
   }
 
@@ -1803,23 +1815,32 @@
   /* ── SYNTAX HIGHLIGHT ── */
   function highlight(cmd) {
     if (!cmd) return '';
+    // Use private-use sentinels while tokenising so later regexes never
+    // re-scan the quotes/brackets inside markup we've already inserted.
+    const O = String.fromCharCode(0xE000), S = String.fromCharCode(0xE001), C = String.fromCharCode(0xE002);
+    const tag = (cls, text) => `${O}${cls}${S}${text}${C}`;
     const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    return cmd.split('\n').map(line => {
+    let out = cmd.split('\n').map(line => {
       // chain operators first (avoid double-processing)
-      line = line.replace(/( )(&&|;)( )/g, (_,a,op,b) => `${a}<span class="syn-chain">${esc(op)}</span>${b}`);
+      line = line.replace(/( )(&&|;)( )/g, (_,a,op,b) => `${a}${tag('syn-chain',op)}${b}`);
       // osascript quit commands
-      line = line.replace(/(osascript)( -e )(.*)$/g, (_,cmd,flag,rest) => `<span class="syn-kill">${cmd}</span><span class="syn-flag">${esc(flag)}</span><span class="syn-str">${esc(rest)}</span>`);
+      line = line.replace(/(osascript)( -e )(.*)$/g, (_,c,flag,rest) => `${tag('syn-kill',c)}${tag('syn-flag',flag)}${tag('syn-str',rest)}`);
       // defaults subcommand
       line = line.replace(/(defaults) (write|delete|read) ([\w.]+) (PrioritizedFonts)/g,
-        (_,d,sub,dom,key) => `<span class="syn-cmd">${d}</span> <span class="syn-flag">${sub}</span> ${esc(dom)} <span class="syn-cmd">${key}</span>`);
+        (_,d,sub,dom,key) => `${tag('syn-cmd',d)} ${tag('syn-flag',sub)} ${dom} ${tag('syn-cmd',key)}`);
       // flags
-      line = line.replace(/( )(-array|-string|-bool|-int)( )/g, (_,a,f,b) => `${a}<span class="syn-flag">${f}</span>${b}`);
+      line = line.replace(/( )(-array|-string|-bool|-int)( )/g, (_,a,f,b) => `${a}${tag('syn-flag',f)}${b}`);
       // quoted strings
-      line = line.replace(/"([^"]*)"/g, (_,inner) => `<span class="syn-str">"${esc(inner)}"</span>`);
+      line = line.replace(/"([^"]*)"/g, (_,inner) => tag('syn-str', `"${inner}"`));
       // continuation backslash
-      line = line.replace(/ \\$/, ` <span class="syn-chain">\\</span>`);
+      line = line.replace(/ \\$/, ` ${tag('syn-chain','\\')}`);
       return line;
     }).join('\n');
+    // Escape real HTML once, then expand sentinels into spans (innermost first).
+    out = esc(out);
+    const re = new RegExp(O + '([\\w-]+)' + S + '((?:(?!' + O + ')[\\s\\S])*?)' + C, 'g');
+    while (out.indexOf(O) !== -1) out = out.replace(re, (_,cls,txt) => `<span class="${cls}">${txt}</span>`);
+    return out;
   }
 
 
@@ -1939,7 +1960,7 @@
   copyBtn.addEventListener('click', async () => {
     const cmd = buildCommand({multiline}); if(!cmd) return;
     await navigator.clipboard.writeText(cmd);
-    const old=copyBtn.textContent; copyBtn.textContent='Copied ✓'; setTimeout(()=>copyBtn.textContent=old,900);
+    const old=copyBtn.textContent; copyBtn.textContent='Copied ✓'; copyBtn.classList.add('copied'); setTimeout(()=>{copyBtn.textContent=old; copyBtn.classList.remove('copied');},1100);
     showToast('Command copied to clipboard', 'success');
   });
   downloadBtn.addEventListener('click', () => {
