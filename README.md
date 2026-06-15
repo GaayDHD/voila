@@ -1,64 +1,151 @@
-# Office Font Prioritiser
+```
+╔═══════════════════════════════════════════════╗
+║                                               ║
+║   ██╗   ██╗  ██████╗  ██╗ ██╗       █████╗    ║
+║   ██║   ██║ ██╔═══██╗ ██║ ██║      ██╔══██╗   ║
+║   ██║   ██║ ██║   ██║ ██║ ██║      ███████║   ║
+║   ╚██╗ ██╔╝ ██║   ██║ ██║ ██║      ██╔══██║   ║
+║    ╚████╔╝  ╚██████╔╝ ██║ ███████╗ ██║  ██║   ║
+║     ╚═══╝    ╚═════╝  ╚═╝ ╚══════╝ ╚═╝  ╚═╝   ║
+║                                               ║
+║        F O N T   P R I O R I T I S E R        ║
+║                                               ║
+╚═══════════════════════════════════════════════╝
+```
 
-## Overview
+> A **client-side** utility that makes Microsoft Office on macOS prefer the
+> fonts *you* choose. Drop in your `.otf` / `.ttf` files, drag them into
+> priority order, and Voilà builds a ready-to-run Terminal command that
+> writes your list into Office's `PrioritizedFonts` preference.
 
-**Office Font Prioritiser** is a web‑based utility designed to help macOS users take control of how Microsoft Office (Word and PowerPoint) choose fonts. The app extracts the exact PostScript names from your font files, deduplicates them and builds a ready‑to‑run Terminal command that instructs Office to favour your chosen fonts over its defaults. Everything runs client‑side, so none of your font data ever leaves your browser.
+<p align="center">
+  <a href="https://voila-black.vercel.app"><b>&#9654; Live demo</b></a>
+  &nbsp;&middot;&nbsp; Vanilla JS &nbsp;&middot;&nbsp; opentype.js &nbsp;&middot;&nbsp; Vite &nbsp;&middot;&nbsp; macOS only &nbsp;&middot;&nbsp; zero uploads
+</p>
 
-## Features
+---
 
-- **Drag‑and‑drop font import.** Drop up to 50 `.otf`/`.ttf` files into the page to extract their PostScript names. Font collections (`.ttc`/`.otc`) can be processed via manual mode.
-- **Automatic deduplication.** Duplicate names are removed automatically, ensuring you only add each font once.
-- **Manual mode.** Paste PostScript names directly if you already know them. You can also merge manually entered names with extracted ones.
-- **Reorder and sort.** Use drag‑and‑drop to reorder names, or click to automatically sort by weight so that lighter styles come first.
-- **Preset management.** Save your current list of PostScript names as a preset in local storage. Presets can be renamed, deleted, exported to JSON and imported later.
-- **Real‑time command generation.** As you edit the list, the tool generates an `defaults write` command you can copy and run in Terminal to set Office’s font priority list. A convenient copy button is provided.
-- **No server backend.** The app is a single‑page HTML file built with vanilla JavaScript and uses [opentype.js](https://github.com/opentypejs/opentype.js) for parsing font files and [SortableJS](https://github.com/SortableJS/Sortable) for drag‑and‑drop functionality.
-- **macOS‑only utility.** Microsoft’s `defaults` system for font priorities is macOS‑specific; the generated command will not affect Office on Windows.
+## ✦ What it does
 
-## How It Works
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                                                                        │
+│    .otf / .ttf      ┌──────────────────┐      ╔════════════════════╗   │
+│    .ttc / .otc  ──► │ read PostScript  │  ──► ║  defaults write …  ║   │
+│    dropped in       │ names in-browser │      ║  PrioritizedFonts  ║   │
+│    the browser      └──────────────────┘      ╚════════════════════╝   │
+│                                                                        │
+│    Nothing ever leaves your machine — font bytes are parsed entirely   │
+│    client-side and never uploaded to any server.                       │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────────┘
+```
 
-Office for macOS allows you to specify a list of font PostScript names that it should prioritise when selecting fonts. This tool helps you compile that list. When you drop a font file onto the page, it reads the file in your browser, extracts the PostScript name from the font’s name table and adds it to a sortable list. You can reorder the names or remove items entirely. The resulting list is formatted into a `defaults write com.microsoft.office OfficeFontPreference -array ...` command. Running this command in Terminal writes your custom list into Office’s preferences. To apply the change, quit Word and PowerPoint completely before running the command.
+Office for macOS reads a `PrioritizedFonts` array from its preferences and
+favours those fonts when picking defaults. Voilà extracts the exact
+PostScript names from your font files, lets you order them, and assembles
+the `defaults write` command that sets that array — no manual typing of
+fiddly font names required.
 
-## Installation
+## ✦ Features
 
-This project is designed to be served as a static site. You can run it locally or host it on GitHub Pages.
+```
+╭─ INPUT ────────────────────────────────────────────────────────────────╮
+│ • Drag-and-drop or pick local .otf / .ttf / .ttc / .otc files          │
+│ • Reads each font's PostScript name from its name table                │
+│ • Up to 50 fonts; duplicates are removed automatically                 │
+╰────────────────────────────────────────────────────────────────────────╯
 
-1. Clone or download this repository:
-   ```sh
-   git clone https://github.com/GaayDHD/office-font-prioritiser.git
-   ```
-2. Open `index.html` directly in your browser or serve it via a static server (for example, using `python -m http.server`).
+╭─ PRIORITISE ───────────────────────────────────────────────────────────╮
+│ • Drag the list to set priority order (top = highest)                  │
+│ • Remove one font, Clear all, or Undo the last change                  │
+│ • Order maps 1:1 to the order Office will prefer fonts                 │
+╰────────────────────────────────────────────────────────────────────────╯
 
-If you prefer not to clone the repo, you can simply visit the live site:
-<https://gaaydhd.github.io/office-font-prioritiser/>
+╭─ OUTPUT ───────────────────────────────────────────────────────────────╮
+│ • Live, syntax-highlighted Terminal command as you edit                │
+│ • Copy (⌘⇧C anywhere) or Download a runnable .sh script                │
+│ • Save / load / export / import named presets (localStorage)           │
+╰────────────────────────────────────────────────────────────────────────╯
 
-## Usage
+╭─ UI ───────────────────────────────────────────────────────────────────╮
+│ • Automatic light / dark mode                                          │
+│ • Mobile responsive down to phone widths                               │
+│ • Atkinson Hyperlegible typography · 100% client-side                  │
+╰────────────────────────────────────────────────────────────────────────╯
+```
 
-1. Open the web page on a macOS device running Microsoft Office.
-2. Drop up to 50 `.otf`/`.ttf` font files into the upload area or click **Choose fonts** and select them from Finder.
-3. The app will extract each font’s PostScript name and list it. Use drag‑and‑drop to reorder or click **Sort by weight** to automatically sort styles.
-4. To add names manually, click **Manual mode**, type the PostScript names (one per line) and merge them with the existing list if required.
-5. Optionally create a preset by entering a name and clicking **Save**. Presets are stored locally and can be exported/imported as JSON.
-6. Copy the generated command using the **Copy** button. Then quit Word and PowerPoint completely.
-7. Open Terminal and paste the command. Press **Return** to run it. The next time you launch Word or PowerPoint, your chosen fonts will be prioritised.
+## ✦ The command it builds
 
-## Development
+The generated command writes your ordered list to Office's preferences and
+quits the apps so the change is picked up on next launch:
 
-The app is a single‑page HTML document with embedded CSS and JavaScript. External dependencies include:
+```bash
+defaults write com.microsoft.office PrioritizedFonts -array \
+  "MyFont-Regular" "MyFont-Bold" "MyFont-Italic" \
+  && osascript -e 'tell application "Microsoft Word" to quit' \
+  && osascript -e 'tell application "Microsoft PowerPoint" to quit'
+```
 
-- **opentype.js** for reading font metadata.
-- **SortableJS** for drag‑and‑drop list reordering.
+> **macOS only** — the `defaults` / `PrioritizedFonts` mechanism is specific
+> to Microsoft Office for Mac. The command has no effect on Office for Windows.
 
-To modify the app:
+## ✦ How to apply
 
-1. Edit `index.html` directly. The CSS is defined inside a `<style>` tag and the JavaScript at the bottom of the file.
-2. Use any local server to test changes. Some browsers restrict font file access from `file://` origins.
-3. When finished, commit your changes and push to GitHub. If the site is hosted via GitHub Pages, the page will update automatically when new commits land on the `main` branch.
+```
+╭─ HOW TO APPLY ─────────────────────────────────────────────────────────╮
+│ 1.  Quit Word and PowerPoint completely                                │
+│ 2.  Run the generated command in Terminal                              │
+│ 3.  Open Office → quit → reopen once to refresh                        │
+╰────────────────────────────────────────────────────────────────────────╯
+```
 
-## Contributing
+## ✦ Quick start
 
-Contributions are welcome! If you encounter a bug or have a feature request, feel free to open an issue. Pull requests that improve the UI, add compatibility features or enhance performance are encouraged. Please ensure that changes are compatible with macOS and do not introduce any server‑side processing.
+```bash
+npm install      # install dependencies
+npm run dev      # Vite dev server   ─►  http://localhost:5173
+npm run build    # production build into dist/
+npm run preview  # serve the production build locally
+```
 
-## License
+> **Tip** — the dev/preview servers are also defined in
+> `.claude/launch.json` (pinned to ports `5173` / `4173`).
 
-This project is released under the MIT License. See [LICENSE](LICENSE) for details.
+## ✦ Project structure
+
+```
+voila/
+├── index.html        ◄─ the entire app: markup + CSS + JS, one file
+├── public/fonts/     ◄─ Atkinson Hyperlegible Next + Mono web fonts
+├── public/vendor/    ◄─ self-hosted opentype.js + SortableJS
+├── vercel.json       ◄─ Vite framework + SPA rewrite config
+├── package.json
+└── README.md
+```
+
+## ✦ Tech stack
+
+```
+┌───────────────┐  ┌───────────────┐  ┌───────────────┐  ┌───────────────┐
+│   Vanilla JS  │  │  opentype.js  │  │   SortableJS  │  │      Vite     │
+│  no framework │  │name-table read│  │  drag reorder │  │ dev + bundler │
+└───────────────┘  └───────────────┘  └───────────────┘  └───────────────┘
+```
+
+[opentype.js](https://github.com/opentypejs/opentype.js) parses the font
+binaries; [SortableJS](https://github.com/SortableJS/Sortable) powers the
+drag-to-reorder list. Both are vendored under `public/vendor/`.
+
+## ✦ Deployment
+
+Hosted on **Vercel**, deployed automatically on every push to `main` via the
+GitHub integration.
+
+```
+git push ─► main ─► Vercel build ─► voila-black.vercel.app
+```
+
+---
+
+<p align="center"><sub>Built client-side — your fonts never leave the browser.</sub></p>
