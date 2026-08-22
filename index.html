@@ -639,6 +639,61 @@
   }
   .preset-grid + .preset-grid { margin-top: 10px; }
 
+  .run-hint {
+    margin-top: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--stroke-2);
+    border-radius: var(--radius-sm, 14px);
+    background: #fafafc;
+  }
+  .run-hint-title {
+    font-family: var(--heading);
+    font-size: 11px;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--muted-2);
+    margin-bottom: 8px;
+  }
+  .run-hint p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.55;
+  }
+  .run-hint code {
+    font-family: var(--mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+    font-size: 12px;
+  }
+  .run-hint-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 10px 0;
+    padding: 10px 12px;
+    border: 1px solid var(--stroke-2);
+    border-radius: 10px;
+    background: #fff;
+  }
+  .run-hint-row code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    color: var(--syn-cmd);
+    font-weight: 600;
+  }
+  .run-hint-row button {
+    flex: none;
+    min-height: 30px;
+    padding: 0 12px;
+    font-size: 12px;
+  }
+  .run-hint-sub {
+    font-size: 11.5px !important;
+    color: var(--muted-2) !important;
+  }
+
   .kbd-hint {
     display: flex;
     align-items: center;
@@ -1139,6 +1194,15 @@
     .nav-font-count {
       background: rgba(44,44,46,.74);
       color: rgba(255,255,255,.72);
+      border-color: rgba(255,255,255,.14);
+    }
+
+    .run-hint {
+      background: rgba(28,28,30,.72);
+      border-color: rgba(255,255,255,.12);
+    }
+    .run-hint-row {
+      background: rgba(44,44,46,.74);
       border-color: rgba(255,255,255,.14);
     }
   }
@@ -1719,7 +1783,8 @@
         <div class="controls manual-hidden">
           <label class="toggle"><input id="toggleClearFirst" type="checkbox" /> Clear existing first</label>
           <label class="toggle"><input id="toggleSafe" type="checkbox" checked /> Safe chaining (&&)</label>
-          <label class="toggle"><input id="toggleKill" type="checkbox" checked /> Quit Word + PowerPoint</label>
+          <label class="toggle"><input id="toggleKill" type="checkbox" checked /> Quit Office first</label>
+          <label class="toggle"><input id="toggleVerify" type="checkbox" checked /> Verify after write</label>
           <label class="toggle"><input id="toggleSort" type="checkbox" /> Auto-sort by weight</label>
           <div class="seg" aria-label="Output mode">
             <button id="outOne" class="active" type="button">One-line</button>
@@ -1761,6 +1826,21 @@
           <pre id="cmdOut">(Drop fonts to generate a command.)</pre>
           <div class="kbd-hint" id="kbdHint" style="display:none">
             <kbd>⌘</kbd><kbd>⇧</kbd><kbd>C</kbd>&nbsp;to copy anywhere on the page
+          </div>
+
+          <div class="run-hint" id="runHint" style="display:none">
+            <div class="run-hint-title">After downloading</div>
+            <p>A downloaded file can never arrive executable — browsers always write it
+              read-only, which is why double-clicking gives a “permission denied” alert.
+              Run it through zsh instead; that needs no <code>chmod</code> and no
+              security settings.</p>
+            <div class="run-hint-row">
+              <code id="runCmd">zsh ~/Downloads/prioritise-fonts.sh</code>
+              <button id="copyRunBtn" type="button">Copy</button>
+            </div>
+            <p class="run-hint-sub">The script detects which Office apps are actually
+              running, asks before quitting anything, writes the preference, verifies it
+              landed, then relaunches only what it closed.</p>
           </div>
         </div>
       </div>
@@ -1837,7 +1917,11 @@
   const toggleClearFirst   = document.getElementById('toggleClearFirst');
   const toggleSafe         = document.getElementById('toggleSafe');
   const toggleKill         = document.getElementById('toggleKill');
+  const toggleVerify       = document.getElementById('toggleVerify');
   const toggleSort         = document.getElementById('toggleSort');
+  const runHint            = document.getElementById('runHint');
+  const copyRunBtn         = document.getElementById('copyRunBtn');
+  const runCmd             = document.getElementById('runCmd');
   const outOne             = document.getElementById('outOne');
   const outMulti           = document.getElementById('outMulti');
   const countBadge         = document.getElementById('countBadge');
@@ -1943,14 +2027,16 @@
     let out = cmd.split('\n').map(line => {
       // chain operators first (avoid double-processing)
       line = line.replace(/( )(&&|;)( )/g, (_,a,op,b) => `${a}${tag('syn-chain',op)}${b}`);
-      // osascript quit commands
-      line = line.replace(/(osascript)( -e )(.*)$/g, (_,c,flag,rest) => `${tag('syn-kill',c)}${tag('syn-flag',flag)}${tag('syn-str',rest)}`);
+      // osascript command word (its AppleScript is picked up by the string rules)
+      line = line.replace(/\bosascript\b/g, c => tag('syn-kill', c));
       // defaults subcommand
       line = line.replace(/(defaults) (write|delete|read) ([\w.]+) (PrioritizedFonts)/g,
         (_,d,sub,dom,key) => `${tag('syn-cmd',d)} ${tag('syn-flag',sub)} ${dom} ${tag('syn-cmd',key)}`);
       // flags
-      line = line.replace(/( )(-array|-string|-bool|-int)( )/g, (_,a,f,b) => `${a}${tag('syn-flag',f)}${b}`);
-      // quoted strings
+      line = line.replace(/( )(-array|-string|-bool|-int|-e)(?= )/g, (_,a,f) => `${a}${tag('syn-flag',f)}`);
+      // quoted strings — single quotes first so the AppleScript inside them
+      // is treated as one token rather than re-scanned for its own quotes
+      line = line.replace(/'([^']*)'/g, (_,inner) => tag('syn-str', `'${inner}'`));
       line = line.replace(/"([^"]*)"/g, (_,inner) => tag('syn-str', `"${inner}"`));
       // continuation backslash
       line = line.replace(/ \\$/, ` ${tag('syn-chain','\\')}`);
@@ -2009,12 +2095,37 @@
     kbdHint.style.display = empty ? 'none' : '';
   }
 
-  /* ── BUILD COMMAND ── */
+  /* ── OFFICE APPS ──
+     An explicit allowlist, never a `com.microsoft.*` prefix match: VS Code
+     (com.microsoft.VSCode), OneDrive, Defender, AutoUpdate and Windows App all
+     share that prefix, and quitting them would be a nasty surprise.
+     PowerPoint's bundle id really is lowercase-p "Powerpoint". */
+  const OFFICE_APPS = [
+    { bundle:'com.microsoft.Word',        name:'Microsoft Word',       short:'Word'       },
+    { bundle:'com.microsoft.Excel',       name:'Microsoft Excel',      short:'Excel'      },
+    { bundle:'com.microsoft.Powerpoint',  name:'Microsoft PowerPoint', short:'PowerPoint' },
+    { bundle:'com.microsoft.Outlook',     name:'Microsoft Outlook',    short:'Outlook'    },
+    { bundle:'com.microsoft.onenote.mac', name:'Microsoft OneNote',    short:'OneNote'    },
+  ];
+
+  /* ── BUILD COMMAND ──
+     Order matters. Office keeps its preferences in memory and flushes them to
+     disk on quit, so a `defaults write` made while an app is running can be
+     overwritten by that flush. Quit first, then write.
+     `tell application X to quit` would LAUNCH an app that isn't running, so the
+     quit is guarded by `is running`, which never launches anything. */
   function buildCommand({ multiline=false }={}) {
     if (!psNames.length) return '';
     const joiner = toggleSafe.checked ? ' && ' : '; ';
     const q = s => `"${s.replaceAll('"','\\"')}"`;
     const parts = [];
+    if (toggleKill.checked) {
+      const list = OFFICE_APPS.map(a => `"${a.name}"`).join(',');
+      parts.push(
+        `osascript -e 'repeat with a in {${list}}' -e 'set n to a as text' ` +
+        `-e 'if application n is running then tell application n to quit' -e 'end repeat'`
+      );
+    }
     if (toggleClearFirst.checked) parts.push(`defaults delete com.microsoft.office PrioritizedFonts 2>/dev/null`);
     if (!multiline) {
       parts.push(`defaults write com.microsoft.office PrioritizedFonts -array ${psNames.map(q).join(' ')}`);
@@ -2023,10 +2134,7 @@
       psNames.forEach((n,i) => lines.push(`${q(n)}${i<psNames.length-1?' \\':''}`));
       parts.push(lines.join('\n'));
     }
-    if (toggleKill.checked) {
-      parts.push(`osascript -e 'tell application "Microsoft Word" to quit'`);
-      parts.push(`osascript -e 'tell application "Microsoft PowerPoint" to quit'`);
-    }
+    if (toggleVerify.checked) parts.push(`defaults read com.microsoft.office PrioritizedFonts`);
     if (!multiline) return parts.join(joiner);
     const chain = toggleSafe.checked ? '&&' : ';';
     return parts.map((p,i) => {
@@ -2085,13 +2193,347 @@
     const old=copyBtn.textContent; copyBtn.textContent='Copied ✓'; copyBtn.classList.add('copied'); setTimeout(()=>{copyBtn.textContent=old; copyBtn.classList.remove('copied');},1100);
     showToast('Command copied to clipboard', 'success');
   });
+  /* ── BUILD SCRIPT ──
+     The downloadable script does what the one-liner cannot: look at the machine
+     it is running on. It finds which Office apps are actually open, asks before
+     closing anything, quits *before* writing so Office cannot flush stale
+     preferences over the top, verifies the write landed, and relaunches only
+     what it closed. */
+  function buildScript() {
+    if (!psNames.length) return '';
+    const zq = s => `'${s.replaceAll("'", `'\\''`)}'`;
+    const stamp = new Date().toISOString().slice(0,16).replace('T',' ');
+    const fontLines = psNames.map(n => `  ${zq(n)}`).join('\n');
+    const appLines  = OFFICE_APPS.map(a => `  ${zq(a.bundle + ':' + a.name)}`).join('\n');
+
+    return `#!/bin/zsh
+#  Voilà · Office Font Prioritiser
+#  Generated ${stamp} · ${location.origin}
+#
+#  RUN ME:   zsh ~/Downloads/prioritise-fonts.sh
+#
+#  A file downloaded by a browser is always written read-only — there is no way
+#  for a web page to hand you an executable. That is why double-clicking gives
+#  "could not be executed because you do not have appropriate access privileges".
+#  Passing it to zsh reads it as data, so it needs no chmod and no security
+#  settings changed.
+#
+#  Flags:
+#    --check   report the current state and exit, changing nothing
+#    --yes     do not ask before quitting apps
+#    --undo    restore the previous list from the most recent backup
+
+emulate -L zsh
+setopt pipe_fail
+
+DOMAIN='com.microsoft.office'
+KEY='PrioritizedFonts'
+BACKUP_DIR="\${HOME}/.voila-font-backups"
+
+# The fonts you chose, in priority order.
+FONTS=(
+${fontLines}
+)
+
+# Explicit allowlist of Office bundle ids — deliberately NOT a
+# "com.microsoft.*" prefix match, because VS Code (com.microsoft.VSCode),
+# OneDrive, Defender, AutoUpdate and Windows App all live under that prefix.
+# PowerPoint's bundle id really is lowercase-p "Powerpoint".
+APPS=(
+${appLines}
+)
+
+# ── output helpers ───────────────────────────────────────────
+if [[ -t 1 ]]; then
+  B=$'\\e[1m'; DIM=$'\\e[2m'; R=$'\\e[31m'; G=$'\\e[32m'; Y=$'\\e[33m'; X=$'\\e[0m'
+else
+  B=''; DIM=''; R=''; G=''; Y=''; X=''
+fi
+say()  { print -r -- "$@" }
+info() { print -r -- "\${DIM}·\${X} $*" }
+ok()   { print -r -- "\${G}✓\${X} $*" }
+warn() { print -r -- "\${Y}!\${X} $*" }
+fail() { print -r -- "\${R}✗\${X} $*" >&2 }
+
+# ── state ────────────────────────────────────────────────────
+DO_CHECK=0; ASSUME_YES=0; DO_UNDO=0
+for arg in "$@"; do
+  case "$arg" in
+    --check) DO_CHECK=1 ;;
+    --yes|-y) ASSUME_YES=1 ;;
+    --undo)  DO_UNDO=1 ;;
+    *) fail "Unknown option: $arg"; exit 2 ;;
+  esac
+done
+
+# Read the current array as newline-separated names.
+# PostScript names cannot contain commas, so splitting on them is safe.
+read_current() {
+  typeset json
+  json=$(/usr/bin/defaults export "$DOMAIN" - 2>/dev/null \\
+         | /usr/bin/plutil -extract "$KEY" json -o - - 2>/dev/null) || return 1
+  [[ -n "$json" ]] || return 1
+  print -r -- "$json" \\
+    | /usr/bin/sed -e 's/^\\[//' -e 's/\\]$//' \\
+    | /usr/bin/tr ',' '\\n' \\
+    | /usr/bin/sed -e 's/^"//' -e 's/"$//' -e '/^$/d'
+}
+
+is_running() {
+  if [[ -x /usr/bin/lsappinfo ]]; then
+    /usr/bin/lsappinfo info -only bundleid "$1" 2>/dev/null | /usr/bin/grep -q 'bundleID'
+  else
+    [[ "$(/usr/bin/osascript -e "application id \\"$1\\" is running" 2>/dev/null)" == 'true' ]]
+  fi
+}
+
+# PostScript names of every font the system can see. ~0.2s, no permissions.
+installed_fonts() {
+  /usr/bin/osascript -l JavaScript \\
+    -e 'ObjC.import("AppKit"); $.NSFontManager.sharedFontManager.availableFonts.js.map(f=>f.js).join("\\n")' \\
+    2>/dev/null
+}
+
+say ''
+say "\${B}Voilà · Office Font Prioritiser\${X}"
+say ''
+
+# ── --undo ───────────────────────────────────────────────────
+if (( DO_UNDO )); then
+  # (Nom) = null_glob, newest first — no error if the directory is empty.
+  typeset -a backups
+  backups=("$BACKUP_DIR"/*.txt(Nom))
+  if (( \${#backups} == 0 )); then
+    fail "No backup found in \${BACKUP_DIR/#$HOME/~}"
+    info 'Backups are only written when this script applies a change.'
+    exit 1
+  fi
+  typeset newest="\${backups[1]}"
+  typeset -a prev
+  # An empty backup means "nothing was set before"; reading it with (@f)
+  # would otherwise yield a single empty string and store ("").
+  if [[ -s "$newest" ]]; then
+    prev=("\${(@f)$(< "$newest")}")
+  else
+    prev=()
+  fi
+  if (( \${#prev} == 0 )); then
+    /usr/bin/defaults delete "$DOMAIN" "$KEY" 2>/dev/null
+    ok "Restored: no prioritised fonts (from \${newest:t})"
+  else
+    /usr/bin/defaults write "$DOMAIN" "$KEY" -array "\${prev[@]}"
+    ok "Restored \${#prev} font(s) from \${newest:t}"
+  fi
+  say ''
+  info 'Quit and reopen Office for the change to take effect.'
+  exit 0
+fi
+
+# ── current state ────────────────────────────────────────────
+typeset -a current
+current=("\${(@f)$(read_current)}") 2>/dev/null
+[[ -n "\${current[1]:-}" ]] || current=()
+
+say "\${B}Current\${X}"
+if (( \${#current} == 0 )); then
+  info 'No prioritised fonts set.'
+else
+  for f in "\${current[@]}"; do info "$f"; done
+fi
+say ''
+
+say "\${B}Requested\${X}  (\${#FONTS} font(s))"
+for f in "\${FONTS[@]}"; do info "$f"; done
+say ''
+
+# ── validate against installed fonts ─────────────────────────
+typeset -a missing
+missing=()
+typeset all
+all=$(installed_fonts)
+if [[ -n "$all" ]]; then
+  for f in "\${FONTS[@]}"; do
+    print -r -- "$all" | /usr/bin/grep -qxF "$f" || missing+=("$f")
+  done
+  if (( \${#missing} > 0 )); then
+    warn "\${#missing} name(s) do not match any installed font — Office will ignore these:"
+    for f in "\${missing[@]}"; do say "    \${Y}\${f}\${X}"; done
+    info 'These must be PostScript names, not the family names shown in menus.'
+    say ''
+  else
+    ok 'All requested fonts are installed.'
+    say ''
+  fi
+else
+  info 'Could not enumerate installed fonts; skipping validation.'
+  say ''
+fi
+
+if (( \${#FONTS} > 50 )); then
+  warn "\${#FONTS} fonts requested; Office honours roughly the first 50."
+  say ''
+fi
+
+# ── which Office apps are open ───────────────────────────────
+typeset -a open_bundles open_names
+open_bundles=(); open_names=()
+for entry in "\${APPS[@]}"; do
+  typeset bundle="\${entry%%:*}" name="\${entry#*:}"
+  if is_running "$bundle"; then
+    open_bundles+=("$bundle"); open_names+=("$name")
+  fi
+done
+
+if (( \${#open_names} == 0 )); then
+  ok 'No Office apps are running.'
+else
+  say "\${B}Running Office apps\${X}"
+  for n in "\${open_names[@]}"; do info "$n"; done
+fi
+say ''
+
+if (( DO_CHECK )); then
+  info 'Ran with --check; nothing was changed.'
+  exit 0
+fi
+
+# ── confirm ──────────────────────────────────────────────────
+if (( \${#open_names} > 0 )) && (( ! ASSUME_YES )); then
+  if [[ -t 0 ]]; then
+    say "These will be asked to quit, then reopened once the fonts are set."
+    say "Save your work first — a document with unsaved changes will prompt."
+    say ''
+    printf 'Continue? [y/N] '
+    typeset reply; read -r reply
+    if [[ "$reply" != [yY]* ]]; then
+      info 'Cancelled. Nothing was changed.'
+      exit 0
+    fi
+    say ''
+  else
+    fail 'Office apps are running and this is not an interactive terminal.'
+    info 'Re-run in Terminal, or pass --yes to quit them without asking.'
+    exit 1
+  fi
+fi
+
+# ── back up the current value ────────────────────────────────
+/bin/mkdir -p "$BACKUP_DIR"
+BACKUP="\${BACKUP_DIR}/$(/bin/date +%Y%m%d-%H%M%S).txt"
+if (( \${#current} > 0 )); then
+  print -rl -- "\${current[@]}" > "$BACKUP"
+else
+  : > "$BACKUP"
+fi
+info "Backed up current list to \${BACKUP/#$HOME/~}"
+
+# ── quit BEFORE writing ──────────────────────────────────────
+# Office holds its preferences in memory and flushes them to disk when it
+# quits. Writing while an app is running invites that flush to overwrite the
+# new value — which is the real reason the "quit, open, quit, reopen" folklore
+# exists. Quit first and one relaunch is enough.
+# NB: zsh expands {1..0} to "1 0", so an empty list must never reach a
+# brace-range loop — hence the explicit guard around the whole block.
+if (( \${#open_bundles} > 0 )); then
+  for i in {1..\${#open_bundles}}; do
+    typeset bundle="\${open_bundles[$i]}" name="\${open_names[$i]}"
+    info "Quitting \${name}…"
+    # 'is running' never launches an app; a bare 'tell … to quit' would.
+    /usr/bin/osascript -e "if application id \\"$bundle\\" is running then tell application id \\"$bundle\\" to quit" 2>/dev/null
+    typeset rc=$?
+    if (( rc != 0 )); then
+      warn "Could not send quit to \${name}."
+      info 'macOS may be blocking automation. Check System Settings ▸ Privacy &'
+      info 'Security ▸ Automation and allow your terminal to control Office, or'
+      info 'quit the app by hand and re-run.'
+    fi
+  done
+
+  # Wait for the processes to actually exit — a save dialog can stall this.
+  typeset waited=0 stalled=0
+  while (( waited < 30 )); do
+    stalled=0
+    for bundle in "\${open_bundles[@]}"; do
+      is_running "$bundle" && stalled=1
+    done
+    (( stalled )) || break
+    sleep 1
+    (( waited += 1 ))
+    if (( waited == 8 )); then
+      warn 'Still waiting — an app is probably showing a "save changes?" dialog.'
+      info 'Deal with it on screen; this will carry on automatically.'
+    fi
+  done
+  if (( stalled )); then
+    fail 'Office is still running after 30s. Nothing was written.'
+    info 'Quit it by hand and run this script again.'
+    exit 1
+  fi
+  ok 'Office is closed.'
+fi
+
+# ── write ────────────────────────────────────────────────────
+/usr/bin/defaults delete "$DOMAIN" "$KEY" 2>/dev/null
+if ! /usr/bin/defaults write "$DOMAIN" "$KEY" -array "\${FONTS[@]}"; then
+  fail 'Writing the preference failed.'
+  exit 1
+fi
+
+# ── verify ───────────────────────────────────────────────────
+typeset -a after
+after=("\${(@f)$(read_current)}") 2>/dev/null
+[[ -n "\${after[1]:-}" ]] || after=()
+
+if (( \${#after} != \${#FONTS} )); then
+  fail "Verification failed: wrote \${#FONTS} font(s), read back \${#after}."
+  exit 1
+fi
+typeset mismatch=0
+if (( \${#FONTS} > 0 )); then
+  for i in {1..\${#FONTS}}; do
+    [[ "\${after[$i]}" == "\${FONTS[$i]}" ]] || mismatch=1
+  done
+fi
+if (( mismatch )); then
+  fail 'Verification failed: the stored list does not match what was written.'
+  exit 1
+fi
+ok "Verified — \${#FONTS} font(s) stored in priority order."
+
+# ── relaunch only what we closed ─────────────────────────────
+if (( \${#open_bundles} > 0 )); then
+  say ''
+  for i in {1..\${#open_bundles}}; do
+    info "Reopening \${open_names[$i]}…"
+    /usr/bin/open -b "\${open_bundles[$i]}" 2>/dev/null \\
+      || warn "Could not reopen \${open_names[$i]}."
+  done
+  info 'Documents are not restored — reopen them from File ▸ Open Recent.'
+fi
+
+say ''
+ok "\${B}Done.\${X}"
+info 'Undo with:  zsh "$0" --undo'
+say ''
+`;
+  }
+
   downloadBtn.addEventListener('click', () => {
-    const cmd = buildCommand({multiline}); if(!cmd) return;
-    const blob = new Blob([`#!/bin/zsh\n# Generated by Office Font Prioritiser\n# Steps: run this → Word and PowerPoint will be asked to quit → open → quit → reopen Office once\n\n${cmd}\n`], {type:'text/plain'});
+    const script = buildScript(); if(!script) return;
+    const blob = new Blob([script], {type:'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); a.href=url; a.download='prioritise-fonts.sh'; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
-    showToast('Script downloaded', 'success');
+    runHint.style.display = '';
+    showToast('Script downloaded — run it with zsh', 'success');
+  });
+
+  copyRunBtn.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(runCmd.textContent.trim());
+    const old = copyRunBtn.textContent;
+    copyRunBtn.textContent = 'Copied ✓'; copyRunBtn.classList.add('copied');
+    setTimeout(() => { copyRunBtn.textContent = old; copyRunBtn.classList.remove('copied'); }, 1100);
+    showToast('Run command copied', 'success');
   });
 
   /* ── PRESETS ── */

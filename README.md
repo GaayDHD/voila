@@ -64,7 +64,9 @@ fiddly font names required.
 
 ╭─ OUTPUT ───────────────────────────────────────────────────────────────╮
 │ • Live, syntax-highlighted Terminal command as you edit                │
-│ • Copy (⌘⇧C anywhere) or Download a runnable .sh script                │
+│ • Copy (⌘⇧C anywhere), or download a script that does the whole job    │
+│ • The script finds open Office apps, quits, writes, verifies, reopens  │
+│ • Backs up the previous list every run — restore it with --undo        │
 │ • Save / load / export / import named presets (localStorage)           │
 ╰────────────────────────────────────────────────────────────────────────╯
 
@@ -77,28 +79,90 @@ fiddly font names required.
 
 ## ✦ The command it builds
 
-The generated command writes your ordered list to Office's preferences and
-quits the apps so the change is picked up on next launch:
+Office keeps its preferences in memory and flushes them to disk when it quits,
+so a `defaults write` made while an app is running can be overwritten by that
+flush. The generated command therefore **quits first, then writes**, and reads
+the value back so you can see it landed:
 
 ```bash
-defaults write com.microsoft.office PrioritizedFonts -array \
-  "MyFont-Regular" "MyFont-Bold" "MyFont-Italic" \
-  && osascript -e 'tell application "Microsoft Word" to quit' \
-  && osascript -e 'tell application "Microsoft PowerPoint" to quit'
+osascript -e 'repeat with a in {"Microsoft Word","Microsoft PowerPoint"}' \
+          -e 'set n to a as text' \
+          -e 'if application n is running then tell application n to quit' \
+          -e 'end repeat' \
+  && defaults write com.microsoft.office PrioritizedFonts -array \
+       "MyFont-Regular" "MyFont-Bold" "MyFont-Italic" \
+  && defaults read com.microsoft.office PrioritizedFonts
 ```
+
+The quit is guarded by `is running` because a bare `tell application X to quit`
+would *launch* an app that was closed.
 
 > **macOS only** — the `defaults` / `PrioritizedFonts` mechanism is specific
 > to Microsoft Office for Mac. The command has no effect on Office for Windows.
 
 ## ✦ How to apply
 
+Copy the command straight into Terminal, or download the script and run it.
+
 ```
 ╭─ HOW TO APPLY ─────────────────────────────────────────────────────────╮
-│ 1.  Quit Word and PowerPoint completely                                │
-│ 2.  Run the generated command in Terminal                              │
-│ 3.  Open Office → quit → reopen once to refresh                        │
+│ 1.  Download the script                                                │
+│ 2.  Run it:  zsh ~/Downloads/prioritise-fonts.sh                       │
+│ 3.  Answer the prompt — it handles quitting and reopening for you      │
 ╰────────────────────────────────────────────────────────────────────────╯
 ```
+
+### Why not just double-click it?
+
+Because it will not work, and no change to this tool can make it work. A file
+downloaded by a browser is always written `-rw-r--r--`; there is no web API
+that can set the execute bit. Double-clicking therefore reports:
+
+> The file "prioritise-fonts.sh" could not be executed because you do not have
+> appropriate access privileges.
+
+Passing the file to `zsh` reads it as *data* rather than executing it, so it
+needs neither `chmod` nor any change to security settings — and it is
+unaffected by the quarantine flag Safari and Firefox attach to downloads.
+
+```bash
+zsh ~/Downloads/prioritise-fonts.sh
+```
+
+### What the script does
+
+Unlike the one-liner, the script can look at the machine it is running on:
+
+```
+╭─ THE SCRIPT ───────────────────────────────────────────────────────────╮
+│ 1.  Shows the current list and the list you asked for                  │
+│ 2.  Warns about names that match no installed font                     │
+│ 3.  Detects which Office apps are actually open                        │
+│ 4.  Asks before quitting anything                                      │
+│ 5.  Quits, waits for a real exit (save dialogs included), then writes  │
+│ 6.  Reads the value back and verifies it matches                       │
+│ 7.  Reopens only the apps it closed                                    │
+╰────────────────────────────────────────────────────────────────────────╯
+```
+
+| Flag | Effect |
+| --- | --- |
+| `--check` | Report current state and exit; changes nothing |
+| `--yes` | Skip the confirmation prompt |
+| `--undo` | Restore the previous list from the newest backup |
+
+Every run backs up the previous list to `~/.voila-font-backups/` first, so
+`--undo` always has something to restore.
+
+**On app detection.** The script matches an explicit allowlist of Office bundle
+ids, never a `com.microsoft.*` prefix — VS Code (`com.microsoft.VSCode`),
+OneDrive, Defender, AutoUpdate and Windows App all share that prefix. Note that
+PowerPoint's bundle id is lowercase-p `com.microsoft.Powerpoint`.
+
+**On automation permission.** Quitting an app via AppleScript requires your
+terminal to hold Automation permission for it. The first run shows a "Terminal
+wants to control Microsoft Word" prompt; if it was ever denied the quit fails
+silently, so the script checks and tells you where to re-enable it.
 
 ## ✦ Quick start
 
