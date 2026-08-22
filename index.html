@@ -1690,8 +1690,10 @@
     .grid.has-fonts .font-card .body {
       padding: 18px 16px 16px;
     }
-    /* Comfortable tap targets on touch screens */
-    .preset-actions button,
+    /* Comfortable tap targets on touch screens.
+       .remove-x is excluded: it is a fixed 22px circle, and a 40px min-height
+       against a 22px width stretches it into a vertical oval. */
+    .preset-actions button:not(.remove-x),
     .preset-grid button,
     #chooseBtn {
       min-height: 40px;
@@ -1835,12 +1837,13 @@
               Run it through zsh instead; that needs no <code>chmod</code> and no
               security settings.</p>
             <div class="run-hint-row">
-              <code id="runCmd">zsh ~/Downloads/prioritise-fonts.sh</code>
+              <code id="runCmd">zsh "$HOME/Downloads/prioritise-fonts.sh"</code>
               <button id="copyRunBtn" type="button">Copy</button>
             </div>
             <p class="run-hint-sub">The script detects which Office apps are actually
               running, asks before quitting anything, writes the preference, verifies it
-              landed, then relaunches only what it closed.</p>
+              landed, then runs the open → quit → reopen cycle Office needs before the
+              fonts show up. The command above does not do that last part.</p>
           </div>
         </div>
       </div>
@@ -2219,9 +2222,11 @@
 #  settings changed.
 #
 #  Flags:
-#    --check   report the current state and exit, changing nothing
-#    --yes     do not ask before quitting apps
-#    --undo    restore the previous list from the most recent backup
+#    --check      report the current state and exit, changing nothing
+#    --yes        do not ask before quitting apps
+#    --undo       restore the previous list from the most recent backup
+#    --no-cycle   write the preference but skip the open/quit/reopen refresh
+#    --settle N   seconds to let Office settle while open (default 8)
 
 emulate -L zsh
 setopt pipe_fail
@@ -2256,15 +2261,22 @@ warn() { print -r -- "\${Y}!\${X} $*" }
 fail() { print -r -- "\${R}✗\${X} $*" >&2 }
 
 # ── state ────────────────────────────────────────────────────
-DO_CHECK=0; ASSUME_YES=0; DO_UNDO=0
-for arg in "$@"; do
-  case "$arg" in
+DO_CHECK=0; ASSUME_YES=0; DO_UNDO=0; DO_CYCLE=1; SETTLE=8
+while (( $# )); do
+  case "$1" in
     --check) DO_CHECK=1 ;;
     --yes|-y) ASSUME_YES=1 ;;
     --undo)  DO_UNDO=1 ;;
-    *) fail "Unknown option: $arg"; exit 2 ;;
+    --no-cycle) DO_CYCLE=0 ;;
+    --settle) shift; SETTLE="\${1:-8}" ;;
+    *) fail "Unknown option: $1"; exit 2 ;;
   esac
+  shift
 done
+if [[ ! "$SETTLE" == <-> ]]; then
+  fail "--settle expects a whole number of seconds, got: $SETTLE"
+  exit 2
+fi
 
 # Read the current array as newline-separated names.
 # PostScript names cannot contain commas, so splitting on them is safe.
@@ -2392,16 +2404,47 @@ else
 fi
 say ''
 
+# Which apps get the open/quit/reopen refresh, and whether they should be left
+# open at the end. The machine is put back the way it was found: apps that were
+# running are reopened; if nothing was running, one app is cycled to prime the
+# font cache and then left closed.
+typeset -a cycle_bundles cycle_names
+cycle_bundles=(); cycle_names=(); restore_open=0
+if (( \${#open_bundles} > 0 )); then
+  cycle_bundles=("\${open_bundles[@]}"); cycle_names=("\${open_names[@]}")
+  restore_open=1
+else
+  for entry in "\${APPS[@]}"; do
+    typeset b="\${entry%%:*}" n="\${entry#*:}"
+    if [[ -d "/Applications/\${n}.app" || -d "/System/Applications/\${n}.app" ]]; then
+      cycle_bundles=("$b"); cycle_names=("$n")
+      break
+    fi
+  done
+  if (( \${#cycle_bundles} > 0 )); then
+    info "\${cycle_names[1]} will be opened and closed once to refresh the font cache."
+    say ''
+  fi
+fi
+
 if (( DO_CHECK )); then
   info 'Ran with --check; nothing was changed.'
   exit 0
 fi
 
 # ── confirm ──────────────────────────────────────────────────
-if (( \${#open_names} > 0 )) && (( ! ASSUME_YES )); then
+if (( \${#cycle_bundles} > 0 )) && (( ! ASSUME_YES )); then
   if [[ -t 0 ]]; then
-    say "These will be asked to quit, then reopened once the fonts are set."
-    say "Save your work first — a document with unsaved changes will prompt."
+    if (( \${#open_names} > 0 )); then
+      say 'These will be asked to quit, the fonts set, and then — because Office'
+      say 'only picks up the new order on the launch after the one that reads it —'
+      say 'opened, closed and opened again. Windows will appear and close on their'
+      say 'own for about a minute.'
+      say 'Save your work first: a document with unsaved changes will prompt.'
+    else
+      say "\${cycle_names[1]} will be opened and closed once to refresh the font"
+      say 'cache, then left closed as it is now.'
+    fi
     say ''
     printf 'Continue? [y/N] '
     typeset reply; read -r reply
@@ -2500,15 +2543,81 @@ if (( mismatch )); then
 fi
 ok "Verified — \${#FONTS} font(s) stored in priority order."
 
-# ── relaunch only what we closed ─────────────────────────────
-if (( \${#open_bundles} > 0 )); then
-  say ''
-  for i in {1..\${#open_bundles}}; do
-    info "Reopening \${open_names[$i]}…"
-    /usr/bin/open -b "\${open_bundles[$i]}" 2>/dev/null \\
-      || warn "Could not reopen \${open_names[$i]}."
+# ── the refresh cycle ────────────────────────────────────────
+# Writing the preference is not enough. Office reads PrioritizedFonts at launch
+# and rebuilds its font cache, but the rebuilt cache only takes effect the
+# *next* time the app starts — which is why the fix needs open → quit → reopen,
+# not just a single relaunch.
+launch_and_wait() {
+  typeset bundle="$1" name="$2"
+  /usr/bin/open -b "$bundle" 2>/dev/null || { warn "Could not open \${name}."; return 1; }
+  typeset t=0
+  while (( t < 60 )); do
+    is_running "$bundle" && break
+    sleep 1; (( t += 1 ))
   done
-  info 'Documents are not restored — reopen them from File ▸ Open Recent.'
+  is_running "$bundle" || { warn "\${name} did not start."; return 1; }
+  return 0
+}
+
+quit_and_wait() {
+  typeset bundle="$1" name="$2"
+  /usr/bin/osascript -e "if application id \\"$bundle\\" is running then tell application id \\"$bundle\\" to quit" 2>/dev/null
+  typeset t=0
+  while (( t < 60 )); do
+    is_running "$bundle" || break
+    sleep 1; (( t += 1 ))
+    if (( t == 10 )); then
+      warn "\${name} is not closing — check for a save dialog on screen."
+    fi
+  done
+  is_running "$bundle" && { warn "\${name} is still running."; return 1; }
+  return 0
+}
+
+if (( DO_CYCLE )) && (( \${#cycle_bundles} > 0 )); then
+  say ''
+  say "\${B}Refreshing Office\${X}"
+  info 'Office needs one full open/quit before the new order takes effect;'
+  info 'windows will appear and close on their own. This takes a minute.'
+  say ''
+  for i in {1..\${#cycle_bundles}}; do
+    typeset cb="\${cycle_bundles[$i]}" cn="\${cycle_names[$i]}"
+    info "\${cn}: opening (1 of 2)…"
+    if launch_and_wait "$cb" "$cn"; then
+      # Let it read the preference and rebuild its font cache before quitting.
+      sleep "$SETTLE"
+      info "\${cn}: closing…"
+      quit_and_wait "$cb" "$cn"
+    fi
+    if (( restore_open )); then
+      info "\${cn}: reopening (2 of 2)…"
+      launch_and_wait "$cb" "$cn" >/dev/null
+    fi
+  done
+
+  # Office rewrites its preferences as it quits, so confirm the value survived
+  # the cycle rather than assuming it did.
+  typeset -a final
+  final=("\${(@f)$(read_current)}") 2>/dev/null
+  [[ -n "\${final[1]:-}" ]] || final=()
+  if (( \${#final} != \${#FONTS} )); then
+    say ''
+    warn 'Office changed the list while restarting; rewriting it.'
+    /usr/bin/defaults write "$DOMAIN" "$KEY" -array "\${FONTS[@]}"
+    info 'Quit and reopen Office once more to be sure it sticks.'
+  else
+    ok 'Preference survived the restart.'
+  fi
+
+  if (( restore_open )); then
+    say ''
+    info 'Documents are not restored — reopen them from File ▸ Open Recent.'
+  fi
+elif (( \${#cycle_bundles} > 0 )); then
+  say ''
+  info 'Skipped the refresh cycle (--no-cycle).'
+  info 'Open and quit Office once, then open it again, for the fonts to appear.'
 fi
 
 say ''
@@ -2518,12 +2627,25 @@ say ''
 `;
   }
 
+  /* A fixed filename collides with earlier downloads, and the browser's
+     "prioritise-fonts(2).sh" fallback is unusable in zsh — the parentheses are
+     glob syntax, so an unquoted path fails with "no matches found". A unique
+     name per download avoids the collision entirely. */
+  function scriptFilename() {
+    const d = new Date(), p = n => String(n).padStart(2,'0');
+    return `prioritise-fonts-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`
+         + `-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}.sh`;
+  }
+
   downloadBtn.addEventListener('click', () => {
     const script = buildScript(); if(!script) return;
+    const name = scriptFilename();
     const blob = new Blob([script], {type:'text/plain'});
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download='prioritise-fonts.sh'; document.body.appendChild(a); a.click(); a.remove();
+    const a = document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
+    // Quote the path: safe even if the browser renames the file anyway.
+    runCmd.textContent = `zsh "$HOME/Downloads/${name}"`;
     runHint.style.display = '';
     showToast('Script downloaded — run it with zsh', 'success');
   });

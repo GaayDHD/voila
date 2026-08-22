@@ -97,6 +97,10 @@ osascript -e 'repeat with a in {"Microsoft Word","Microsoft PowerPoint"}' \
 The quit is guarded by `is running` because a bare `tell application X to quit`
 would *launch* an app that was closed.
 
+Note that this command **does not perform the open → quit → reopen cycle**
+described below — it only sets the preference. Use the downloadable script if
+you want the fonts to take effect without doing that by hand.
+
 > **macOS only** — the `defaults` / `PrioritizedFonts` mechanism is specific
 > to Microsoft Office for Mac. The command has no effect on Office for Windows.
 
@@ -107,8 +111,8 @@ Copy the command straight into Terminal, or download the script and run it.
 ```
 ╭─ HOW TO APPLY ─────────────────────────────────────────────────────────╮
 │ 1.  Download the script                                                │
-│ 2.  Run it:  zsh ~/Downloads/prioritise-fonts.sh                       │
-│ 3.  Answer the prompt — it handles quitting and reopening for you      │
+│ 2.  Run the command shown under the download button                    │
+│ 3.  Answer the prompt — it handles the whole restart cycle for you     │
 ╰────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -126,8 +130,13 @@ needs neither `chmod` nor any change to security settings — and it is
 unaffected by the quarantine flag Safari and Firefox attach to downloads.
 
 ```bash
-zsh ~/Downloads/prioritise-fonts.sh
+zsh "$HOME/Downloads/prioritise-fonts-20260823-041836.sh"
 ```
+
+Each download gets a unique timestamped name. That matters: with a fixed name,
+a second download lands as `prioritise-fonts(2).sh`, and in zsh the parentheses
+are glob syntax — an unquoted path then fails with `no matches found`. The app
+shows the exact command for the file you just downloaded, already quoted.
 
 ### What the script does
 
@@ -141,15 +150,34 @@ Unlike the one-liner, the script can look at the machine it is running on:
 │ 4.  Asks before quitting anything                                      │
 │ 5.  Quits, waits for a real exit (save dialogs included), then writes  │
 │ 6.  Reads the value back and verifies it matches                       │
-│ 7.  Reopens only the apps it closed                                    │
+│ 7.  Runs the refresh cycle: open → quit → open                         │
+│ 8.  Confirms the value survived, and rewrites it if Office changed it  │
 ╰────────────────────────────────────────────────────────────────────────╯
 ```
+
+### Why the open → quit → reopen cycle
+
+Writing the preference is not enough on its own. Office reads `PrioritizedFonts`
+at launch and rebuilds its font cache, but the rebuilt cache only takes effect
+on the *next* launch — so the app has to be opened, quit, and opened again
+before the new order shows up. That is the manual ritual this tool exists to
+remove, and the script now performs it for you, with progress printed as it
+goes. Expect it to take about a minute per app.
+
+The machine is left as it was found: apps that were running are reopened, and
+if nothing was running, one app is cycled to prime the cache and then closed
+again. Documents are not restored — reopen them from **File ▸ Open Recent**.
+
+Because Office rewrites its preferences as it quits, the script re-reads the
+value after the cycle and rewrites it if Office changed it.
 
 | Flag | Effect |
 | --- | --- |
 | `--check` | Report current state and exit; changes nothing |
 | `--yes` | Skip the confirmation prompt |
 | `--undo` | Restore the previous list from the newest backup |
+| `--no-cycle` | Write the preference but skip the restart cycle |
+| `--settle N` | Seconds to let Office settle while open (default 8) |
 
 Every run backs up the previous list to `~/.voila-font-backups/` first, so
 `--undo` always has something to restore.
