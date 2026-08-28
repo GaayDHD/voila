@@ -1210,8 +1210,11 @@
 
   /* Ligature Explorer styling parity for shared UI elements */
   :root {
+    --muted: rgba(29,29,31,.60);
     --muted2: rgba(29,29,31,.44);
+    --card: rgba(255,255,255,.82);
     --card-solid: #ffffff;
+    --stroke: rgba(29,29,31,.09);
     --stroke2: rgba(29,29,31,.13);
     --shadow: 0 2px 24px rgba(0,0,0,.06), 0 24px 80px rgba(0,0,0,.08);
     --shadow2: 0 2px 8px rgba(0,0,0,.04), 0 8px 24px rgba(0,0,0,.06);
@@ -1651,6 +1654,118 @@
 
     .bar-count {
       box-shadow: 0 0 0 1px color-mix(in oklab, var(--blue) 18%, transparent);
+    }
+  }
+
+
+  /* ──────────────────────────────────────────────────────────────
+     Ligature Explorer parity, pass 2: card sizing, column layout,
+     upload/dropzone treatment, and the shared chrome around them.
+     Kept last in the sheet so it wins over the earlier dark blocks.
+     ────────────────────────────────────────────────────────────── */
+
+  /* LAYOUT — narrow input column, wide output column (Ligature's 300px 1fr) */
+  .grid.has-fonts {
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items: start;
+  }
+
+  .col-right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  /* CARDS — flat, no outer shadow or glow in either theme */
+  .card,
+  .font-card,
+  .command-card,
+  .presets-card,
+  .how-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--stroke);
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: none;
+    overflow: hidden;
+    transition: opacity .55s ease, transform .55s ease, box-shadow .2s;
+  }
+
+  .card:hover,
+  .font-card:hover,
+  .command-card:hover,
+  .presets-card:hover,
+  .how-card:hover {
+    box-shadow: none;
+    border-color: var(--stroke);
+    transform: none;
+  }
+
+  .sub-card,
+  .run-hint,
+  .run-hint-row,
+  .toast {
+    box-shadow: none;
+  }
+
+  .card .bar .title {
+    color: var(--muted);
+  }
+
+  .section-title {
+    font-family: var(--heading);
+    color: var(--muted2);
+  }
+
+  .bar-count[data-empty="true"] {
+    opacity: 0;
+    transform: scale(.8);
+  }
+
+  /* UPLOAD / DROPZONE — mirrors Ligature's persistent upload card:
+     a purple-tinted dashed well at the small radius. */
+  .grid.has-fonts #dropzone {
+    border: 1.5px dashed color-mix(in oklab, var(--blue) 48%, var(--stroke2)) !important;
+    background: color-mix(in oklab, var(--blue) 7%, var(--card)) !important;
+    border-radius: var(--radius-sm);
+    padding: 26px 18px;
+  }
+
+  .grid.has-fonts #dropzone:hover {
+    border-color: color-mix(in oklab, var(--blue) 60%, var(--stroke2)) !important;
+    background: color-mix(in oklab, var(--blue) 10%, var(--card)) !important;
+  }
+
+  .grid.has-fonts #dropzone.dragover {
+    border-color: var(--blue) !important;
+    background: color-mix(in oklab, var(--blue) 12%, var(--card)) !important;
+    transform: scale(1.01);
+  }
+
+  .grid.has-fonts .drop-icon {
+    background: color-mix(in oklab, var(--blue) 22%, var(--card)) !important;
+    border-color: color-mix(in oklab, var(--blue) 34%, var(--stroke)) !important;
+    color: color-mix(in oklab, var(--blue) 68%, #fff) !important;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    padding: 36px 0 20px;
+  }
+
+  .empty-state svg {
+    opacity: .45;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    /* Soft purple icon: white at low opacity sitting over the tint */
+    .grid.has-fonts .drop-icon {
+      background: color-mix(in oklab, var(--blue) 30%, rgba(255,255,255,.05)) !important;
+      border-color: color-mix(in oklab, var(--blue) 46%, rgba(255,255,255,.16)) !important;
+      color: rgba(255,255,255,.62) !important;
     }
   }
 
